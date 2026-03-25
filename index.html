@@ -285,14 +285,13 @@ function wkLabel(o){
 function getMonthKey(wk){return'month_'+wk.slice(0,7);}
 
 // ── Check key builders ─────────────────────────────────────────────
+// Hebdo: keyed by week (resets each week)
+// Bimens/Mensuel: keyed by tid+room+slot only — lockout handled by checkedAt date
 function ckH(wk,tid,room){return`${wk}|${tid}|${room}`;}
-function ckB(mk,tid,room,slot){return`${mk}|${tid}|${room}|${slot}`;}
-function ckM(mk,tid,room){return`${mk}|${tid}|${room}`;}
+function ckB(tid,room,slot){return`bimens|${tid}|${room}|${slot}`;}
+function ckM(tid,room){return`mensuel|${tid}|${room}`;}
 
 // ── Lock info ──────────────────────────────────────────────────────
-// Returns {done, locked, unlockDate}
-// done=true means it was checked at some point
-// locked=true means cooldown not elapsed → show greyed with redo button
 function lockInfo(key,freq){
   const c=checks[key];
   if(!c||!c.done)return{done:false,locked:false};
@@ -303,10 +302,9 @@ function lockInfo(key,freq){
 }
 
 function getKey(tid,room,freq,slot){
-  const wk=wkKey(offset),mk=getMonthKey(wk);
-  if(freq==='hebdo')return ckH(wk,tid,room);
-  if(freq==='bimens')return ckB(mk,tid,room,slot||'A');
-  return ckM(mk,tid,room);
+  if(freq==='hebdo')return ckH(wkKey(offset),tid,room);
+  if(freq==='bimens')return ckB(tid,room,slot||'A');
+  return ckM(tid,room);
 }
 
 // ── Toggle / Redo ──────────────────────────────────────────────────
@@ -382,19 +380,18 @@ async function quickAdd(room){
 
 // Bilan helpers
 async function markWeekDone(wk){
-  const mk=getMonthKey(wk),t=todayStr();
+  const t=todayStr();
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(task=>{
-    if(task.freq==='bimens'){['A','B'].forEach(s=>{const k=ckB(mk,task.id,room,s);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};});}
-    else if(task.freq==='mensuel'){const k=ckM(mk,task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
+    if(task.freq==='bimens'){['A','B'].forEach(s=>{const k=ckB(task.id,room,s);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};});}
+    else if(task.freq==='mensuel'){const k=ckM(task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
     else{const k=ckH(wk,task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
   }));
   await save();
 }
 async function resetWeek(wk){
-  const mk=getMonthKey(wk);
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(task=>{
-    if(task.freq==='bimens'){['A','B'].forEach(s=>delete checks[ckB(mk,task.id,room,s)]);}
-    else if(task.freq==='mensuel'){delete checks[ckM(mk,task.id,room)];}
+    if(task.freq==='bimens'){['A','B'].forEach(s=>delete checks[ckB(task.id,room,s)]);}
+    else if(task.freq==='mensuel'){delete checks[ckM(task.id,room)];}
     else{delete checks[ckH(wk,task.id,room)];}
   }));
   await save();
@@ -570,9 +567,8 @@ function renderBilan(){
   else renderCal(weeks,ty,tm);
 }
 function isDoneInBilan(wk,t,room){
-  const mk=getMonthKey(wk);
-  if(t.freq==='bimens')return['A','B'].every(s=>{const c=checks[ckB(mk,t.id,room,s)];return c&&c.done;});
-  if(t.freq==='mensuel'){const c=checks[ckM(mk,t.id,room)];return c&&c.done;}
+  if(t.freq==='bimens')return['A','B'].every(s=>{const c=checks[ckB(t.id,room,s)];return c&&c.done;});
+  if(t.freq==='mensuel'){const c=checks[ckM(t.id,room)];return c&&c.done;}
   const c=checks[ckH(wk,t.id,room)];return c&&c.done;
 }
 function renderRecap(weeks){
@@ -582,11 +578,11 @@ function renderRecap(weeks){
     getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
       const mk=getMonthKey(w.key);
       if(t.freq==='bimens'){
-        ['A','B'].forEach(s=>{wTot++;const c=checks[ckB(mk,t.id,room,s)];if(c&&c.done)wDone++;});
-        rows.push({name:`${t.name} · ${room} (1ère)`,done:!!(checks[ckB(mk,t.id,room,'A')]&&checks[ckB(mk,t.id,room,'A')].done)});
-        rows.push({name:`${t.name} · ${room} (2e)`,done:!!(checks[ckB(mk,t.id,room,'B')]&&checks[ckB(mk,t.id,room,'B')].done)});
+        ['A','B'].forEach(s=>{wTot++;const c=checks[ckB(t.id,room,s)];if(c&&c.done)wDone++;});
+        rows.push({name:`${t.name} · ${room} (1ère)`,done:!!(checks[ckB(t.id,room,'A')]&&checks[ckB(t.id,room,'A')].done)});
+        rows.push({name:`${t.name} · ${room} (2e)`,done:!!(checks[ckB(t.id,room,'B')]&&checks[ckB(t.id,room,'B')].done)});
       }else if(t.freq==='mensuel'){
-        wTot++;const c=checks[ckM(mk,t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
+        wTot++;const c=checks[ckM(t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
       }else{
         wTot++;const c=checks[ckH(w.key,t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
       }
@@ -631,8 +627,8 @@ function renderCal(weeks,ty,tm){
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
     weeks.forEach(w=>{
       if(!ds[w.key])ds[w.key]={done:0,tot:0};const mk=getMonthKey(w.key);
-      if(t.freq==='bimens'){ds[w.key].tot+=2;ds[w.key].done+=['A','B'].filter(s=>{const c=checks[ckB(mk,t.id,room,s)];return c&&c.done;}).length;}
-      else if(t.freq==='mensuel'){ds[w.key].tot++;const c=checks[ckM(mk,t.id,room)];if(c&&c.done)ds[w.key].done++;}
+      if(t.freq==='bimens'){ds[w.key].tot+=2;ds[w.key].done+=['A','B'].filter(s=>{const c=checks[ckB(t.id,room,s)];return c&&c.done;}).length;}
+      else if(t.freq==='mensuel'){ds[w.key].tot++;const c=checks[ckM(t.id,room)];if(c&&c.done)ds[w.key].done++;}
       else{ds[w.key].tot++;const c=checks[ckH(w.key,t.id,room)];if(c&&c.done)ds[w.key].done++;}
     });
   }));
