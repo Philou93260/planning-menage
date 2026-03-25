@@ -26,8 +26,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .tab-ico{font-size:20px;line-height:1}
 .app{max-width:600px;margin:0 auto;padding:10px}
 .card{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:14px;margin-bottom:10px}
-.screen{display:none}
-.screen.on{display:block}
+.screen{display:none}.screen.on{display:block}
 .week-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .week-nav button{background:#edf7f1;color:#2d6a4f;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
 .week-nav button.today{background:#2d6a4f;color:white;padding:6px 10px;font-size:11px}
@@ -47,34 +46,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .room-name{font-weight:700;font-size:14px;flex:1}
 .room-badge{font-size:11px;padding:2px 9px;border-radius:10px;background:#d4edda;color:#155724;font-weight:700}
 .room-badge.full{background:#2d6a4f;color:white}
-.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #f0f0f0;position:relative}
+
+/* Task rows */
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #f0f0f0}
+.task-row.locked-row{background:#fafafa}
 .chk{width:24px;height:24px;border-radius:7px;border:2px solid #bbb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:700;color:white;transition:all .15s}
 .chk.on{background:#2d6a4f;border-color:#2d6a4f}
+.chk.locked{background:#e8e8e8;border-color:#ccc;cursor:default}
 .task-name{flex:1;font-size:14px}
 .task-name.struck{text-decoration:line-through;color:#bbb}
+.task-name.locked-name{color:#aaa}
+
+/* Locked info row */
+.locked-info{display:flex;align-items:center;gap:8px;padding:4px 14px 10px 48px}
+.locked-date{font-size:11px;color:#aaa;flex:1}
+.redo-btn{background:transparent;border:none;cursor:pointer;font-size:18px;padding:2px 6px;border-radius:8px;line-height:1;transition:transform .3s}
+.redo-btn:active{transform:rotate(180deg)}
+
 /* freq badge */
 .ftag{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;font-weight:600;flex-shrink:0;border:1px solid transparent;user-select:none}
 .fhebdo{background:#e3f0fb;color:#1a5a9a;border-color:#90c4ef}
 .fbimens{background:#edf7f0;color:#1a7a4a;border-color:#80cfa0}
 .fmensuel{background:#ede7f6;color:#5c35b5;border-color:#b39ddb}
-/* dropdown — fixed position to avoid clipping */
-.freq-picker{position:relative;display:inline-flex}
 .freq-menu{position:fixed;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:500;overflow:hidden;min-width:150px}
 .freq-menu.hide{display:none}
 .freq-opt{padding:10px 16px;font-size:13px;cursor:pointer;font-weight:500}
 .freq-opt:active{background:#f0f7f4}
 .freq-opt.sel{color:#2d6a4f;font-weight:700}
 .freq-opt+.freq-opt{border-top:1px solid #f0f0f0}
-/* bi-mensuel target date */
-.bi-target{display:flex;align-items:center;gap:8px;padding:6px 14px 10px 48px;flex-wrap:wrap}
+
+/* bi / mensuel sub-rows */
+.bi-target{display:flex;align-items:center;gap:8px;padding:4px 14px 10px 48px;flex-wrap:wrap}
 .bi-chk{width:22px;height:22px;border-radius:6px;border:2px solid #80cfa0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
 .bi-chk.on{background:#1a7a4a;border-color:#1a7a4a}
+.bi-chk.locked{background:#e8e8e8;border-color:#ccc;cursor:default}
 .bi-label{font-size:12px;color:#555;font-weight:500}
-/* mensuel target */
-.mens-target{display:flex;align-items:center;gap:8px;padding:6px 14px 10px 48px}
+.bi-label.locked-lbl{color:#bbb}
+.mens-target{display:flex;align-items:center;gap:8px;padding:4px 14px 10px 48px}
 .mens-chk{width:22px;height:22px;border-radius:6px;border:2px solid #b39ddb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
 .mens-chk.on{background:#5c35b5;border-color:#5c35b5}
-.mens-label{font-size:12px;color:#555;font-weight:500}
+.mens-chk.locked{background:#e8e8e8;border-color:#ccc;cursor:default}
+
 /* manage */
 .manage-room{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
 .manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
@@ -84,14 +96,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .del-btn{width:28px;height:28px;border-radius:50%;background:#fff0f0;border:1px solid #ffcccc;color:#cc3333;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .add-task-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #f0f0f0;background:#fafff9}
 .add-task-row input{flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none}
-.add-task-row input:focus{border-color:#2d6a4f}
 .add-task-row button{background:#2d6a4f;color:white;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
 .add-room-form{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:14px;margin-bottom:10px}
 .add-room-form h3{font-size:14px;font-weight:700;margin-bottom:10px;color:#2d6a4f}
 .form-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .form-row input,.form-row select{flex:1;min-width:120px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none}
-.form-row input:focus,.form-row select:focus{border-color:#2d6a4f}
 .form-row button{background:#2d6a4f;color:white;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600}
+
 /* bilan */
 .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .month-nav button{background:#edf7f1;color:#2d6a4f;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
@@ -100,13 +111,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .vtab{flex:1;text-align:center;padding:7px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;border:1.5px solid #ddd;background:#fff;color:#666}
 .vtab.on{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
 .recap-week{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;overflow:hidden}
-.recap-week-hdr{display:flex;align-items:center;padding:10px 14px;background:#f0f7f4;gap:10px;cursor:pointer}
+.recap-week-hdr{display:flex;align-items:center;padding:10px 14px;background:#f0f7f4;gap:8px;cursor:pointer}
 .recap-week-lbl{font-weight:700;font-size:13px;flex:1}
 .recap-pct{font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}
-.recap-reset{font-size:11px;padding:4px 10px;border-radius:8px;background:#fff;border:1px solid #2d6a4f;color:#2d6a4f;cursor:pointer;font-weight:600;margin-left:4px}
+.recap-reset{font-size:11px;padding:4px 10px;border-radius:8px;background:#fff;border:1px solid #2d6a4f;color:#2d6a4f;cursor:pointer;font-weight:600}
 .recap-task-row{display:flex;align-items:center;padding:8px 14px;border-top:1px solid #f5f5f5;gap:10px}
 .recap-task-name{flex:1;font-size:13px}
-.status-icon{font-size:16px;flex-shrink:0}
 .missed-room{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;overflow:hidden}
 .missed-room-hdr{padding:10px 14px;background:#fff5f5;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
 .missed-task{padding:8px 14px;border-top:1px solid #f5f5f5;font-size:13px;display:flex;gap:8px;align-items:center}
@@ -115,31 +125,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .cal-head{text-align:center;font-size:10px;font-weight:700;color:#666;padding:4px 0}
 .cal-day{border-radius:8px;padding:4px 2px;text-align:center;min-height:40px}
 .cal-day .day-num{font-size:11px;font-weight:600;margin-bottom:2px}
-.cal-day.empty{opacity:0}
-.cal-day.ok{background:#e8f5e9}
-.cal-day.miss{background:#fff0f0}
-.cal-day.partial{background:#fff8e1}
-.cal-day.future{background:#f5f5f5;color:#bbb}
+.cal-day.empty{opacity:0}.cal-day.ok{background:#e8f5e9}.cal-day.miss{background:#fff0f0}.cal-day.partial{background:#fff8e1}.cal-day.future{background:#f5f5f5;color:#bbb}
 .cal-dot{width:5px;height:5px;border-radius:50%;margin:1px auto}
 .empty-state{text-align:center;padding:2rem;color:#aaa;font-size:14px}
 .loading{text-align:center;padding:2rem;color:#888;font-size:14px}
-footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <span class="topbar-icon">🧹</span>
   <div style="flex:1">
     <div class="topbar-title">Planning Ménage</div>
     <div class="topbar-sub" id="topweek"></div>
   </div>
-  <div class="sync-dot" id="syncdot" title="Synchronisation"></div>
+  <div class="sync-dot" id="syncdot"></div>
 </div>
-
 <div class="app">
-
-  <!-- PLANNING -->
   <div class="screen on" id="screen-planning">
     <div class="card">
       <div class="week-nav">
@@ -154,6 +155,7 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
         <div class="li"><div class="ld" style="background:#90c4ef"></div>Hebdo</div>
         <div class="li"><div class="ld" style="background:#80cfa0"></div>Bi-mensuel</div>
         <div class="li"><div class="ld" style="background:#b39ddb"></div>Mensuel</div>
+        <div class="li"><div class="ld" style="background:#e8e8e8"></div>Déjà fait · 🔄 pour refaire</div>
       </div>
     </div>
     <div class="filters">
@@ -167,7 +169,6 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
     <div id="rooms"></div>
   </div>
 
-  <!-- BILAN -->
   <div class="screen" id="screen-bilan">
     <div class="card">
       <div class="month-nav">
@@ -184,7 +185,6 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
     <div id="bilan-content"></div>
   </div>
 
-  <!-- GÉRER -->
   <div class="screen" id="screen-manage">
     <div class="add-room-form">
       <h3>➕ Ajouter une tâche</h3>
@@ -206,40 +206,22 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
 </div>
 
 <div class="tabbar">
-  <button class="tab on" id="tab-planning" onclick="showScreen('planning')">
-    <span class="tab-ico">📋</span>Planning
-  </button>
-  <button class="tab" id="tab-bilan" onclick="showScreen('bilan')">
-    <span class="tab-ico">📊</span>Bilan
-  </button>
-  <button class="tab" id="tab-manage" onclick="showScreen('manage')">
-    <span class="tab-ico">⚙️</span>Gérer
-  </button>
+  <button class="tab on" id="tab-planning" onclick="showScreen('planning')"><span class="tab-ico">📋</span>Planning</button>
+  <button class="tab" id="tab-bilan" onclick="showScreen('bilan')"><span class="tab-ico">📊</span>Bilan</button>
+  <button class="tab" id="tab-manage" onclick="showScreen('manage')"><span class="tab-ico">⚙️</span>Gérer</button>
 </div>
 
-<!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,setDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const db=getFirestore(initializeApp({apiKey:"AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",authDomain:"planning-menage-c832d.firebaseapp.com",projectId:"planning-menage-c832d",storageBucket:"planning-menage-c832d.firebasestorage.app",messagingSenderId:"1089776086126",appId:"1:1089776086126:web:7318486e939eea4dbf8a7f"}));
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",
-  authDomain: "planning-menage-c832d.firebaseapp.com",
-  projectId: "planning-menage-c832d",
-  storageBucket: "planning-menage-c832d.firebasestorage.app",
-  messagingSenderId: "1089776086126",
-  appId: "1:1089776086126:web:7318486e939eea4dbf8a7f"
-};
-
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-
-// ── Constants ──────────────────────────────────────────────────────
 const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
 const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳'};
 const FREQS=['hebdo','bimens','mensuel'];
 const FLABELS={hebdo:'Hebdo',bimens:'Bi-mensuel',mensuel:'Mensuel'};
 const FCLASS={hebdo:'fhebdo',bimens:'fbimens',mensuel:'fmensuel'};
+const LOCKDAYS={hebdo:7,bimens:14,mensuel:30};
 const MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS_FR=['L','M','M','J','V','S','D'];
 
@@ -262,340 +244,277 @@ const DEFAULT_TASKS=[
   {id:'verr',    name:'Verrière',         rooms:['Salon'],freq:'mensuel'},
 ];
 
-// ── State ──────────────────────────────────────────────────────────
-let offset=0, filter='all', openMenu=null, openMenuTid=null, openMenuRoom=null;
-let monthOffset=0, bilanView='recap';
-let currentScreen='planning';
-// Firestore data
-let checks={};      // {checkKey: true}
-let freqOv={};      // {taskId: freq}
-let customTasks=[]; // [{id,name,rooms,freq}]
-let deletedIds=[];  // [id or 'del_room_tid_room']
-let roomOrder=[...DEFAULT_ROOMS];
-let dbLoaded=false;
+let offset=0,filter='all',openMenu=null;
+let monthOffset=0,bilanView='recap',currentScreen='planning';
+let checks={},freqOv={},customTasks=[],deletedIds=[],roomOrder=[...DEFAULT_ROOMS],dbLoaded=false;
 
-// ── Firestore helpers ──────────────────────────────────────────────
-function setSyncDot(state){ // 'sync','ok','err'
-  const d=document.getElementById('syncdot');
-  d.className='sync-dot'+(state==='ok'?' ok':state==='sync'?' sync':'');
-}
-
-async function saveToFirestore(data){
+function setSyncDot(s){const d=document.getElementById('syncdot');d.className='sync-dot'+(s==='ok'?' ok':s==='sync'?' sync':'');}
+async function save(){
   setSyncDot('sync');
-  try{
-    await setDoc(doc(db,'planning','shared'),data,{merge:true});
-    setSyncDot('ok');
-  }catch(e){setSyncDot('err');console.error(e);}
+  try{await setDoc(doc(db,'planning','shared'),{checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder},{merge:true});setSyncDot('ok');}
+  catch(e){setSyncDot('');console.error(e);}
 }
-
-// Listen to real-time changes from Firestore
-onSnapshot(doc(db,'planning','shared'), snap=>{
-  if(snap.exists()){
-    const d=snap.data();
-    checks=d.checks||{};
-    freqOv=d.freq||{};
-    customTasks=d.custom||[];
-    deletedIds=d.deleted||[];
-    roomOrder=d.rooms||[...DEFAULT_ROOMS];
-  }
-  dbLoaded=true;
-  setSyncDot('ok');
-  renderAll();
+onSnapshot(doc(db,'planning','shared'),snap=>{
+  if(snap.exists()){const d=snap.data();checks=d.checks||{};freqOv=d.freq||{};customTasks=d.custom||[];deletedIds=d.deleted||[];roomOrder=d.rooms||[...DEFAULT_ROOMS];}
+  dbLoaded=true;setSyncDot('ok');renderAll();
 });
 
-async function save(){
-  await saveToFirestore({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
-}
-
-// ── Task helpers ───────────────────────────────────────────────────
 function getAllTasks(){
-  const base=DEFAULT_TASKS
-    .filter(t=>!deletedIds.includes(t.id))
-    .map(t=>({...t,freq:freqOv[t.id]||t.freq}));
-  return [...base,...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))];
+  return[...DEFAULT_TASKS.filter(t=>!deletedIds.includes(t.id)).map(t=>({...t,freq:freqOv[t.id]||t.freq})),
+         ...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))];
 }
 function getAllRooms(){
-  const custom=customTasks.flatMap(t=>t.rooms).filter(r=>!roomOrder.includes(r));
-  return [...roomOrder,...new Set(custom)];
+  return[...roomOrder,...new Set(customTasks.flatMap(t=>t.rooms).filter(r=>!roomOrder.includes(r)))];
 }
 function getTasksForRoom(room){
   return getAllTasks().filter(t=>t.rooms.includes(room)&&!deletedIds.includes('del_room_'+t.id+'_'+room));
 }
 
-// ── Week utils ─────────────────────────────────────────────────────
-function wkKey(o){
-  const n=new Date(),dw=n.getDay()||7,m=new Date(n);
-  m.setDate(n.getDate()-dw+1+o*7);
-  return m.toISOString().slice(0,10);
-}
+// ── Date utils ─────────────────────────────────────────────────────
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function addDays(s,n){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function fmtDate(s){return new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});}
+function wkKey(o){const n=new Date(),dw=n.getDay()||7,m=new Date(n);m.setDate(n.getDate()-dw+1+o*7);return m.toISOString().slice(0,10);}
 function wkLabel(o){
-  const k=wkKey(o),m=new Date(k),s=new Date(m);
-  s.setDate(m.getDate()+6);
+  const k=wkKey(o),m=new Date(k),s=new Date(m);s.setDate(m.getDate()+6);
   const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
   if(o===0)return`Cette semaine · ${f(m)} – ${f(s)}`;
   if(o===-1)return`Sem. dernière · ${f(m)} – ${f(s)}`;
   return`${f(m)} – ${f(s)}`;
 }
+function getMonthKey(wk){return'month_'+wk.slice(0,7);}
 
-// ── Check keys ─────────────────────────────────────────────────────
-// hebdo:   wk|tid|room
-// bimens:  month_YYYY-MM|tid|room|A or B  (1st or 2nd fortnight)
-// mensuel: month_YYYY-MM|tid|room
+// ── Check key builders ─────────────────────────────────────────────
+function ckH(wk,tid,room){return`${wk}|${tid}|${room}`;}
+function ckB(mk,tid,room,slot){return`${mk}|${tid}|${room}|${slot}`;}
+function ckM(mk,tid,room){return`${mk}|${tid}|${room}`;}
 
-function getCurrentMonth(){
-  const n=new Date();
-  return n.toISOString().slice(0,7); // YYYY-MM
+// ── Lock info ──────────────────────────────────────────────────────
+// Returns {done, locked, unlockDate}
+// done=true means it was checked at some point
+// locked=true means cooldown not elapsed → show greyed with redo button
+function lockInfo(key,freq){
+  const c=checks[key];
+  if(!c||!c.done)return{done:false,locked:false};
+  const unlock=addDays(c.at,LOCKDAYS[freq]);
+  const today=todayStr();
+  if(today<unlock)return{done:true,locked:true,unlockDate:unlock};
+  return{done:true,locked:false};
 }
-function getMonthKey(wk){
-  return 'month_'+wk.slice(0,7);
-}
-function ck(wk,tid,room,slot){
-  const tasks=getAllTasks();
-  const t=tasks.find(x=>x.id===tid);
-  const freq=t?t.freq:'hebdo';
-  if(freq==='bimens'){
-    const mk=getMonthKey(wk);
-    return slot?`${mk}|${tid}|${room}|${slot}`:`${mk}|${tid}|${room}|A`;
-  }
-  if(freq==='mensuel'){
-    return `${getMonthKey(wk)}|${tid}|${room}`;
-  }
-  return `${wk}|${tid}|${room}`;
-}
-function isOn(wk,tid,room,slot){return!!checks[ck(wk,tid,room,slot)];}
 
-async function toggle(wk,tid,room,slot){
-  const k=ck(wk,tid,room,slot);
-  if(checks[k])delete checks[k]; else checks[k]=true;
+function getKey(tid,room,freq,slot){
+  const wk=wkKey(offset),mk=getMonthKey(wk);
+  if(freq==='hebdo')return ckH(wk,tid,room);
+  if(freq==='bimens')return ckB(mk,tid,room,slot||'A');
+  return ckM(mk,tid,room);
+}
+
+// ── Toggle / Redo ──────────────────────────────────────────────────
+async function doCheck(tid,room,freq,slot){
+  const key=getKey(tid,room,freq,slot);
+  const c=checks[key];
+  if(c&&c.done)delete checks[key];
+  else checks[key]={done:true,at:todayStr()};
+  await save();
+}
+// Redo: reset checkedAt to today → new cooldown from today
+async function doRedo(tid,room,freq,slot){
+  const key=getKey(tid,room,freq,slot);
+  checks[key]={done:true,at:todayStr()};
   await save();
 }
 
-// ── Navigation ─────────────────────────────────────────────────────
+// ── Nav ────────────────────────────────────────────────────────────
 function cw(d,reset){offset=reset?0:offset+d;closeMenu();renderPlanning();}
 function cm(d){monthOffset+=d;renderBilan();}
 function sf(f){
   filter=f;
-  ['all','todo','done','hebdo','bimens','mensuel'].forEach(id=>{
-    const el=document.getElementById('f'+id);
-    if(el)el.classList.toggle('on',id===f);
-  });
+  ['all','todo','done','hebdo','bimens','mensuel'].forEach(id=>{const el=document.getElementById('f'+id);if(el)el.classList.toggle('on',id===f);});
   closeMenu();renderPlanning();
 }
 function showScreen(s){
   currentScreen=s;
-  ['planning','manage','bilan'].forEach(id=>{
-    document.getElementById('screen-'+id).classList.toggle('on',id===s);
-    document.getElementById('tab-'+id).classList.toggle('on',id===s);
-  });
-  if(s==='manage')renderManage();
-  if(s==='bilan')renderBilan();
-  if(s==='planning')renderPlanning();
+  ['planning','manage','bilan'].forEach(id=>{document.getElementById('screen-'+id).classList.toggle('on',id===s);document.getElementById('tab-'+id).classList.toggle('on',id===s);});
+  if(s==='manage')renderManage();else if(s==='bilan')renderBilan();else renderPlanning();
 }
-function setView(v){
-  bilanView=v;
-  ['recap','missed','cal'].forEach(id=>document.getElementById('vt-'+id).classList.toggle('on',id===v));
-  renderBilan();
-}
+function setView(v){bilanView=v;['recap','missed','cal'].forEach(id=>document.getElementById('vt-'+id).classList.toggle('on',id===v));renderBilan();}
 
-// ── Dropdown menu (fixed position to avoid clipping) ──────────────
-function closeMenu(){
-  if(openMenu){openMenu.classList.add('hide');openMenu=null;openMenuTid=null;openMenuRoom=null;}
-}
-function toggleFreqMenu(tid,room,badgeEl){
-  const menu=document.getElementById(`fm-${tid}-${room}`);
-  if(!menu)return;
-  if(openMenu&&openMenu!==menu){openMenu.classList.add('hide');}
+// ── Dropdown ───────────────────────────────────────────────────────
+function closeMenu(){if(openMenu){openMenu.classList.add('hide');openMenu=null;}}
+function toggleFreqMenu(tid,room,el){
+  const menu=document.getElementById(`fm-${tid}-${room}`);if(!menu)return;
+  if(openMenu&&openMenu!==menu)openMenu.classList.add('hide');
   if(!menu.classList.contains('hide')){closeMenu();return;}
-  // Position the menu above or below the badge
-  const rect=badgeEl.getBoundingClientRect();
-  const spaceBelow=window.innerHeight-rect.bottom;
-  const menuH=130;
-  if(spaceBelow<menuH+10){
-    menu.style.top=(rect.top-menuH-6)+'px';
-  }else{
-    menu.style.top=(rect.bottom+6)+'px';
-  }
+  const rect=el.getBoundingClientRect();
   menu.style.left=Math.max(8,rect.right-150)+'px';
-  menu.classList.remove('hide');
-  openMenu=menu;openMenuTid=tid;openMenuRoom=room;
+  menu.style.top=(window.innerHeight-rect.bottom>140?rect.bottom+6:rect.top-136)+'px';
+  menu.classList.remove('hide');openMenu=menu;
 }
-async function setFreq(tid,freq){
-  freqOv[tid]=freq;
-  await save();
-  closeMenu();
-}
+async function setFreq(tid,freq){freqOv[tid]=freq;await save();closeMenu();}
 
-// ── Add/delete tasks ───────────────────────────────────────────────
+// ── Add/delete ─────────────────────────────────────────────────────
 async function addTask(){
   const name=document.getElementById('new-task-name').value.trim();
   const room=document.getElementById('new-task-room').value;
   const freq=document.getElementById('new-task-freq').value;
   if(!name||!room){alert('Remplis le nom et la pièce !');return;}
-  const existing=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
-  if(existing){if(!existing.rooms.includes(room))existing.rooms.push(room);}
-  else{customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});}
+  const ex=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
+  if(ex){if(!ex.rooms.includes(room))ex.rooms.push(room);}
+  else customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});
   document.getElementById('new-task-name').value='';
   await save();renderManage();renderPlanning();
 }
 async function deleteTaskFromRoom(tid,room){
   const def=DEFAULT_TASKS.find(t=>t.id===tid);
-  if(def){
-    if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}
-    else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}
-  }
+  if(def){if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}}
   const ci=customTasks.findIndex(t=>t.id===tid);
-  if(ci>=0){
-    customTasks[ci].rooms=customTasks[ci].rooms.filter(r=>r!==room);
-    if(customTasks[ci].rooms.length===0)customTasks.splice(ci,1);
-  }
+  if(ci>=0){customTasks[ci].rooms=customTasks[ci].rooms.filter(r=>r!==room);if(!customTasks[ci].rooms.length)customTasks.splice(ci,1);}
   await save();renderManage();renderPlanning();
 }
 async function quickAdd(room){
-  const inp=document.getElementById('it-'+room);
-  const name=inp.value.trim();if(!name)return;
+  const inp=document.getElementById('it-'+room);const name=inp.value.trim();if(!name)return;
   const freq=document.getElementById('new-task-freq').value||'hebdo';
-  const existing=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
-  if(existing){if(!existing.rooms.includes(room))existing.rooms.push(room);}
-  else{customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});}
-  inp.value='';
-  await save();renderManage();renderPlanning();
+  const ex=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
+  if(ex){if(!ex.rooms.includes(room))ex.rooms.push(room);}
+  else customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});
+  inp.value='';await save();renderManage();renderPlanning();
 }
 
-// ── Expose globals ─────────────────────────────────────────────────
+// Bilan helpers
+async function markWeekDone(wk){
+  const mk=getMonthKey(wk),t=todayStr();
+  getAllRooms().forEach(room=>getTasksForRoom(room).forEach(task=>{
+    if(task.freq==='bimens'){['A','B'].forEach(s=>{const k=ckB(mk,task.id,room,s);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};});}
+    else if(task.freq==='mensuel'){const k=ckM(mk,task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
+    else{const k=ckH(wk,task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
+  }));
+  await save();
+}
+async function resetWeek(wk){
+  const mk=getMonthKey(wk);
+  getAllRooms().forEach(room=>getTasksForRoom(room).forEach(task=>{
+    if(task.freq==='bimens'){['A','B'].forEach(s=>delete checks[ckB(mk,task.id,room,s)]);}
+    else if(task.freq==='mensuel'){delete checks[ckM(mk,task.id,room)];}
+    else{delete checks[ckH(wk,task.id,room)];}
+  }));
+  await save();
+}
+
+// Expose
 window.cw=cw;window.cm=cm;window.sf=sf;window.showScreen=showScreen;window.setView=setView;
 window.toggleFreqMenu=toggleFreqMenu;window.setFreq=setFreq;
 window.addTask=addTask;window.deleteTaskFromRoom=deleteTaskFromRoom;window.quickAdd=quickAdd;
-window.tog=function(id){const el=document.getElementById(id);if(el)el.classList.toggle('hide');};
-window.doToggle=async function(wk,tid,room,slot){await toggle(wk,tid,room,slot);};
-window.markWeekDone=async function(wk){
-  const tasks=getAllTasks();
-  getAllRooms().forEach(room=>{
-    getTasksForRoom(room).forEach(t=>{
-      if(t.freq==='bimens'){
-        checks[ck(wk,t.id,room,'A')]=true;
-        checks[ck(wk,t.id,room,'B')]=true;
-      }else{
-        checks[ck(wk,t.id,room)]=true;
-      }
-    });
-  });
-  await save();
-};
-window.resetWeek=async function(wk){
-  // Remove all keys for this week
-  const tasks=getAllTasks();
-  getAllRooms().forEach(room=>{
-    getTasksForRoom(room).forEach(t=>{
-      if(t.freq==='bimens'){
-        delete checks[ck(wk,t.id,room,'A')];
-        delete checks[ck(wk,t.id,room,'B')];
-      }else{
-        delete checks[ck(wk,t.id,room)];
-      }
-    });
-  });
-  await save();
-};
+window.markWeekDone=markWeekDone;window.resetWeek=resetWeek;
+window.doCheck=doCheck;window.doRedo=doRedo;
+window.tog=id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide');};
 
 // ── RENDER PLANNING ────────────────────────────────────────────────
+function freqMenu(tid,room,freq){
+  return`<div style="position:relative;display:inline-flex">
+    <span class="ftag ${FCLASS[freq]}" onclick="toggleFreqMenu('${tid}','${room}',this)">${FLABELS[freq]} ▾</span>
+    <div class="freq-menu hide" id="fm-${tid}-${room}">
+      ${FREQS.map(f=>`<div class="freq-opt${freq===f?' sel':''}" onclick="setFreq('${tid}','${f}')">${FLABELS[f]}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
 function renderPlanning(){
   if(!dbLoaded){document.getElementById('rooms').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
-  const wk=wkKey(offset);
-  const lbl=wkLabel(offset);
+  const wk=wkKey(offset),lbl=wkLabel(offset);
   document.getElementById('wl').textContent=lbl;
   document.getElementById('topweek').textContent=lbl;
 
+  // Progress: count only non-locked tasks
   let tot=0,done=0;
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
-    if(t.freq==='bimens'){
-      ['A','B'].forEach(s=>{tot++;if(isOn(wk,t.id,room,s))done++;});
-    }else{tot++;if(isOn(wk,t.id,room))done++;}
+    if(t.freq==='bimens'){['A','B'].forEach(s=>{const li=lockInfo(getKey(t.id,room,t.freq,s),t.freq);if(!li.locked){tot++;if(li.done)done++;}});}
+    else{const li=lockInfo(getKey(t.id,room,t.freq),t.freq);if(!li.locked){tot++;if(li.done)done++;}}
   }));
   const pct=tot?Math.round(done/tot*100):0;
   document.getElementById('pf').style.width=pct+'%';
-  document.getElementById('pt').textContent=`${done} / ${tot} tâches · ${pct}%`;
+  document.getElementById('pt').textContent=`${done} / ${tot} tâches disponibles · ${pct}%`;
 
   let html='';
   getAllRooms().forEach(room=>{
-    let tasks=getTasksForRoom(room);
-    let filtered=tasks.filter(t=>{
+    const tasks=getTasksForRoom(room);
+    const filtered=tasks.filter(t=>{
       if(filter==='hebdo')return t.freq==='hebdo';
       if(filter==='bimens')return t.freq==='bimens';
       if(filter==='mensuel')return t.freq==='mensuel';
-      if(filter==='done'){
-        if(t.freq==='bimens')return['A','B'].some(s=>isOn(wk,t.id,room,s));
-        return isOn(wk,t.id,room);
-      }
-      if(filter==='todo'){
-        if(t.freq==='bimens')return['A','B'].some(s=>!isOn(wk,t.id,room,s));
-        return!isOn(wk,t.id,room);
-      }
+      // done / todo: based on non-locked state
+      const li=t.freq==='bimens'?lockInfo(getKey(t.id,room,t.freq,'A'),t.freq):lockInfo(getKey(t.id,room,t.freq),t.freq);
+      if(filter==='done')return li.done&&!li.locked;
+      if(filter==='todo')return!li.done||li.locked;
       return true;
     });
     if(!filtered.length)return;
 
+    // Badge: non-locked done / non-locked total
     let rd=0,rt=0;
     tasks.forEach(t=>{
-      if(t.freq==='bimens'){['A','B'].forEach(s=>{rt++;if(isOn(wk,t.id,room,s))rd++;});}
-      else{rt++;if(isOn(wk,t.id,room))rd++;}
+      if(t.freq==='bimens'){['A','B'].forEach(s=>{const li=lockInfo(getKey(t.id,room,t.freq,s),t.freq);if(!li.locked){rt++;if(li.done)rd++;}});}
+      else{const li=lockInfo(getKey(t.id,room,t.freq),t.freq);if(!li.locked){rt++;if(li.done)rd++;}}
     });
-    const full=rd===rt&&rt>0;
+    const full=rt>0&&rd===rt;
 
     html+=`<div class="room-block">
       <div class="room-hdr" onclick="tog('rb-${room}')">
         <span class="room-ico">${ICONS[room]||'🏠'}</span>
         <span class="room-name">${room}</span>
         <span class="room-badge${full?' full':''}">${rd}/${rt}</span>
-      </div>
-      <div id="rb-${room}">`;
+      </div><div id="rb-${room}">`;
 
     filtered.forEach(t=>{
-      const isBi=t.freq==='bimens';
-      const isMens=t.freq==='mensuel';
-      const chk=(!isBi)&&isOn(wk,t.id,room);
+      const freq=t.freq,mk=getMonthKey(wkKey(offset));
 
-      // For mensuel: get current month label
-      const now=new Date();
-      const monthLabel=MONTHS_FR[now.getMonth()]+' '+now.getFullYear();
-      const biMonth=getMonthKey(wk).replace('month_','');
-      const [by,bm]=biMonth.split('-');
-      const biLabel=MONTHS_FR[parseInt(bm)-1]+' '+by;
-
-      html+=`<div class="task-row">
-        ${(isBi||isMens)?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
-        <span class="task-name${chk?' struck':''}">${t.name}</span>
-        <div class="freq-picker" style="position:static">
-          <span class="ftag ${FCLASS[t.freq]}" id="badge-${t.id}-${room}" onclick="toggleFreqMenu('${t.id}','${room}',this)">${FLABELS[t.freq]} ▾</span>
-          <div class="freq-menu hide" id="fm-${t.id}-${room}">
-            ${FREQS.map(f=>`<div class="freq-opt${t.freq===f?' sel':''}" onclick="setFreq('${t.id}','${f}')">${FLABELS[f]}</div>`).join('')}
-          </div>
-        </div>
-      </div>`;
-
-      // Bi-mensuel: two checkboxes for current month (1st and 2nd fortnight)
-      if(isBi){
-        const onA=isOn(wk,t.id,room,'A');
-        const onB=isOn(wk,t.id,room,'B');
-        html+=`<div class="bi-target">
-          <div class="bi-chk${onA?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','A')">${onA?'✓':''}</div>
-          <span class="bi-label">1ère quinzaine · ${biLabel}</span>
-          <div style="width:12px"></div>
-          <div class="bi-chk${onB?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','B')">${onB?'✓':''}</div>
-          <span class="bi-label">2e quinzaine</span>
+      if(freq==='hebdo'){
+        const key=getKey(t.id,room,freq);
+        const li=lockInfo(key,freq);
+        html+=`<div class="task-row${li.locked?' locked-row':''}">
+          <div class="chk${li.done?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}')"`:''}>${li.done?'✓':''}</div>
+          <span class="task-name${li.done&&!li.locked?' struck':''}${li.locked?' locked-name':''}">${t.name}</span>
+          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}')" title="Refaire maintenant">🔄</button>`:''}
+          ${freqMenu(t.id,room,freq)}
         </div>`;
-      }
-      // Mensuel: one checkbox for current month
-      if(isMens){
-        const onM=isOn(wk,t.id,room);
-        html+=`<div class="mens-target">
-          <div class="mens-chk${onM?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${onM?'✓':''}</div>
-          <span class="mens-label">Fait en ${monthLabel}</span>
+        if(li.locked){
+          html+=`<div class="locked-info"><span class="locked-date">✓ Fait · Prochaine dispo le ${fmtDate(li.unlockDate)}</span></div>`;
+        }
+
+      }else if(freq==='bimens'){
+        html+=`<div class="task-row">
+          <div style="width:24px;flex-shrink:0"></div>
+          <span class="task-name">${t.name}</span>
+          ${freqMenu(t.id,room,freq)}
+        </div>`;
+        ['A','B'].forEach((slot,i)=>{
+          const key=getKey(t.id,room,freq,slot);
+          const li=lockInfo(key,freq);
+          const lbl=i===0?'1ère quinzaine':'2e quinzaine';
+          html+=`<div class="bi-target">
+            <div class="bi-chk${li.done?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','${slot}')"`:''}>${li.done?'✓':''}</div>
+            <span class="bi-label${li.locked?' locked-lbl':''}">${lbl}</span>
+            ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','${slot}')" title="Refaire maintenant">🔄</button><span class="locked-date">→ ${fmtDate(li.unlockDate)}</span>`:''}
+          </div>`;
+        });
+
+      }else{
+        // mensuel
+        const key=getKey(t.id,room,freq);
+        const li=lockInfo(key,freq);
+        html+=`<div class="task-row${li.locked?' locked-row':''}">
+          <div style="width:24px;flex-shrink:0"></div>
+          <span class="task-name${li.locked?' locked-name':''}">${t.name}</span>
+          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}')" title="Refaire maintenant">🔄</button>`:''}
+          ${freqMenu(t.id,room,freq)}
+        </div>
+        <div class="mens-target">
+          <div class="mens-chk${li.done?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}')"`:''}>${li.done?'✓':''}</div>
+          <span class="mens-label${li.locked?' locked-lbl':''}">${li.locked?`Fait · Prochaine dispo le ${fmtDate(li.unlockDate)}`:li.done?'Fait ce mois ✓':'À faire ce mois'}</span>
         </div>`;
       }
     });
     html+=`</div></div>`;
   });
-
   document.getElementById('rooms').innerHTML=html||'<div class="empty-state">Aucune tâche.</div>';
 }
 
@@ -605,25 +524,19 @@ function renderManage(){
   sel.innerHTML='<option value="">Pièce...</option>';
   getAllRooms().forEach(r=>sel.innerHTML+=`<option value="${r}">${r}</option>`);
   sel.innerHTML+=`<option value="__new">+ Nouvelle pièce...</option>`;
-
   let html='';
   getAllRooms().forEach(room=>{
-    const tasks=getTasksForRoom(room);
-    if(!tasks.length)return;
+    const tasks=getTasksForRoom(room);if(!tasks.length)return;
     html+=`<div class="manage-room">
       <div class="manage-room-hdr" onclick="tog('mr-${room}')">
-        <span>${ICONS[room]||'🏠'}</span>
-        <span class="room-name">${room}</span>
+        <span>${ICONS[room]||'🏠'}</span><span class="room-name">${room}</span>
         <span style="font-size:12px;color:#888">${tasks.length} tâche${tasks.length>1?'s':''}</span>
-      </div>
-      <div id="mr-${room}">`;
-    tasks.forEach(t=>{
-      html+=`<div class="manage-task-row">
-        <span class="manage-task-name">${t.name}</span>
-        <span class="ftag ${FCLASS[t.freq]}" style="cursor:default">${FLABELS[t.freq]}</span>
-        <button class="del-btn" onclick="deleteTaskFromRoom('${t.id}','${room}')">×</button>
-      </div>`;
-    });
+      </div><div id="mr-${room}">`;
+    tasks.forEach(t=>html+=`<div class="manage-task-row">
+      <span class="manage-task-name">${t.name}</span>
+      <span class="ftag ${FCLASS[t.freq]}" style="cursor:default">${FLABELS[t.freq]}</span>
+      <button class="del-btn" onclick="deleteTaskFromRoom('${t.id}','${room}')">×</button>
+    </div>`);
     html+=`<div class="add-task-row">
       <input placeholder="Nouvelle tâche..." id="it-${room}" onkeydown="if(event.key==='Enter')quickAdd('${room}')">
       <button onclick="quickAdd('${room}')">＋</button>
@@ -634,14 +547,12 @@ function renderManage(){
 
 // ── RENDER BILAN ───────────────────────────────────────────────────
 function getMonthWeeks(mo){
-  const now=new Date();
-  const target=new Date(now.getFullYear(),now.getMonth()+mo,1);
+  const now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mo,1);
   const ty=target.getFullYear(),tm=target.getMonth();
-  const firstDay=new Date(ty,tm,1),lastDay=new Date(ty,tm+1,0);
-  let mon=new Date(firstDay);
-  const dw=mon.getDay()||7;mon.setDate(mon.getDate()-dw+1);
+  const first=new Date(ty,tm,1),last=new Date(ty,tm+1,0);
+  let mon=new Date(first);const dw=mon.getDay()||7;mon.setDate(mon.getDate()-dw+1);
   const weeks=[];
-  while(mon<=lastDay){
+  while(mon<=last){
     const sun=new Date(mon);sun.setDate(mon.getDate()+6);
     const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
     weeks.push({key:mon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
@@ -649,168 +560,120 @@ function getMonthWeeks(mo){
   }
   return{weeks,ty,tm};
 }
-
 function renderBilan(){
   if(!dbLoaded){document.getElementById('bilan-content').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
-  const now=new Date();
-  const target=new Date(now.getFullYear(),now.getMonth()+monthOffset,1);
+  const now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+monthOffset,1);
   document.getElementById('mlabel').textContent=`${MONTHS_FR[target.getMonth()]} ${target.getFullYear()}`;
   const{weeks,ty,tm}=getMonthWeeks(monthOffset);
-  if(bilanView==='recap')renderRecap(weeks,ty,tm);
-  else if(bilanView==='missed')renderMissed(weeks,ty,tm);
+  if(bilanView==='recap')renderRecap(weeks);
+  else if(bilanView==='missed')renderMissed(weeks);
   else renderCal(weeks,ty,tm);
 }
-
-function taskDone(wk,t,room){
-  if(t.freq==='bimens')return['A','B'].every(s=>isOn(wk,t.id,room,s));
-  return isOn(wk,t.id,room);
+function isDoneInBilan(wk,t,room){
+  const mk=getMonthKey(wk);
+  if(t.freq==='bimens')return['A','B'].every(s=>{const c=checks[ckB(mk,t.id,room,s)];return c&&c.done;});
+  if(t.freq==='mensuel'){const c=checks[ckM(mk,t.id,room)];return c&&c.done;}
+  const c=checks[ckH(wk,t.id,room)];return c&&c.done;
 }
-
-function renderRecap(weeks,ty,tm){
-  const today=new Date();
-  // Most recent first
-  const sorted=[...weeks].reverse();
-  let html='';
-  sorted.forEach(w=>{
-    const isFuture=w.mon>today;
-    let wDone=0,wTot=0;
-    const rows=[];
-    getAllRooms().forEach(room=>{
-      getTasksForRoom(room).forEach(t=>{
-        if(t.freq==='bimens'){
-          ['A','B'].forEach(s=>{wTot++;if(isOn(w.key,t.id,room,s))wDone++;});
-          const dA=isOn(w.key,t.id,room,'A'),dB=isOn(w.key,t.id,room,'B');
-          rows.push({name:`${t.name} · ${room} (1ère)`,done:dA,future:isFuture});
-          rows.push({name:`${t.name} · ${room} (2e)`,done:dB,future:isFuture});
-        }else{
-          wTot++;const d=taskDone(w.key,t,room);if(d)wDone++;
-          rows.push({name:`${t.name} · ${room}`,done:d,future:isFuture});
-        }
-      });
-    });
+function renderRecap(weeks){
+  const nowD=new Date();let html='';
+  [...weeks].reverse().forEach(w=>{
+    const isFuture=w.mon>nowD;let wDone=0,wTot=0;const rows=[];
+    getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
+      const mk=getMonthKey(w.key);
+      if(t.freq==='bimens'){
+        ['A','B'].forEach(s=>{wTot++;const c=checks[ckB(mk,t.id,room,s)];if(c&&c.done)wDone++;});
+        rows.push({name:`${t.name} · ${room} (1ère)`,done:!!(checks[ckB(mk,t.id,room,'A')]&&checks[ckB(mk,t.id,room,'A')].done)});
+        rows.push({name:`${t.name} · ${room} (2e)`,done:!!(checks[ckB(mk,t.id,room,'B')]&&checks[ckB(mk,t.id,room,'B')].done)});
+      }else if(t.freq==='mensuel'){
+        wTot++;const c=checks[ckM(mk,t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
+      }else{
+        wTot++;const c=checks[ckH(w.key,t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
+      }
+    }));
     const pct=wTot?Math.round(wDone/wTot*100):0;
-    const pctCol=pct>=80?'#2d6a4f':pct>=40?'#e6a817':'#cc3333';
+    const col=pct>=80?'#2d6a4f':pct>=40?'#e6a817':'#cc3333';
     html+=`<div class="recap-week">
       <div class="recap-week-hdr" onclick="tog('rw-${w.key}')">
         <span class="recap-week-lbl">${w.label}</span>
-        ${!isFuture?`<span class="recap-pct" style="background:${pctCol}22;color:${pctCol}">${pct}%</span>
+        ${!isFuture?`<span class="recap-pct" style="background:${col}22;color:${col}">${pct}%</span>
         <button class="recap-reset" onclick="event.stopPropagation();markWeekDone('${w.key}')">✅ Tout fait</button>
-        <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();resetWeek('${w.key}')">↺</button>`
-        :'<span style="font-size:12px;color:#aaa">À venir</span>'}
+        <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();resetWeek('${w.key}')">↺</button>`:'<span style="font-size:12px;color:#aaa">À venir</span>'}
       </div>`;
     if(!isFuture){
       html+=`<div id="rw-${w.key}" class="hide">`;
-      rows.forEach(r=>{
-        const ico=r.future?'⏳':r.done?'✅':'❌';
-        html+=`<div class="recap-task-row"><span class="status-icon">${ico}</span><span class="recap-task-name">${r.name}</span></div>`;
-      });
+      rows.forEach(r=>html+=`<div class="recap-task-row"><span style="font-size:16px;flex-shrink:0">${r.done?'✅':'❌'}</span><span class="recap-task-name">${r.name}</span></div>`);
       html+=`</div>`;
     }
     html+=`</div>`;
   });
   document.getElementById('bilan-content').innerHTML=html||'<div class="empty-state">Aucune donnée.</div>';
 }
-
-function renderMissed(weeks,ty,tm){
-  const today=new Date();
-  const missedByRoom={};
-  getAllRooms().forEach(room=>{
-    getTasksForRoom(room).forEach(t=>{
-      weeks.forEach(w=>{
-        if(w.sun>=today)return;
-        if(!taskDone(w.key,t,room)){
-          if(!missedByRoom[room])missedByRoom[room]=[];
-          missedByRoom[room].push({task:t.name,week:w.label});
-        }
-      });
+function renderMissed(weeks){
+  const nowD=new Date();const missedByRoom={};
+  getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
+    weeks.forEach(w=>{
+      if(w.sun>=nowD)return;
+      if(!isDoneInBilan(w.key,t,room)){if(!missedByRoom[room])missedByRoom[room]=[];missedByRoom[room].push({task:t.name,week:w.label});}
     });
-  });
+  }));
   let html='';
   Object.keys(missedByRoom).forEach(room=>{
-    const items=missedByRoom[room];
-    if(!items.length)return;
-    html+=`<div class="missed-room">
-      <div class="missed-room-hdr">${ICONS[room]||'🏠'} ${room} <span style="color:#cc3333;font-size:12px">(${items.length} manquée${items.length>1?'s':''})</span></div>`;
-    items.forEach(m=>{
-      html+=`<div class="missed-task"><span style="flex:1">${m.task}</span><span class="missed-week-tag">${m.week}</span></div>`;
-    });
+    const items=missedByRoom[room];if(!items.length)return;
+    html+=`<div class="missed-room"><div class="missed-room-hdr">${ICONS[room]||'🏠'} ${room} <span style="color:#cc3333;font-size:12px">(${items.length} manquée${items.length>1?'s':''})</span></div>`;
+    items.forEach(m=>html+=`<div class="missed-task"><span style="flex:1">${m.task}</span><span class="missed-week-tag">${m.week}</span></div>`);
     html+=`</div>`;
   });
   document.getElementById('bilan-content').innerHTML=html||'<div class="empty-state">🎉 Aucune tâche manquée ce mois !</div>';
 }
-
 function renderCal(weeks,ty,tm){
-  const today=new Date();
-  const dayStatus={};
-  getAllRooms().forEach(room=>{
-    getTasksForRoom(room).forEach(t=>{
-      weeks.forEach(w=>{
-        const d=w.key;
-        if(!dayStatus[d])dayStatus[d]={done:0,tot:0};
-        if(t.freq==='bimens'){
-          dayStatus[d].tot+=2;
-          dayStatus[d].done+=(['A','B'].filter(s=>isOn(w.key,t.id,room,s)).length);
-        }else{
-          dayStatus[d].tot++;
-          if(taskDone(w.key,t,room))dayStatus[d].done++;
-        }
-      });
+  const nowD=new Date();const ds={};
+  getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
+    weeks.forEach(w=>{
+      if(!ds[w.key])ds[w.key]={done:0,tot:0};const mk=getMonthKey(w.key);
+      if(t.freq==='bimens'){ds[w.key].tot+=2;ds[w.key].done+=['A','B'].filter(s=>{const c=checks[ckB(mk,t.id,room,s)];return c&&c.done;}).length;}
+      else if(t.freq==='mensuel'){ds[w.key].tot++;const c=checks[ckM(mk,t.id,room)];if(c&&c.done)ds[w.key].done++;}
+      else{ds[w.key].tot++;const c=checks[ckH(w.key,t.id,room)];if(c&&c.done)ds[w.key].done++;}
     });
-  });
-  const firstDay=new Date(ty,tm,1),daysInMonth=new Date(ty,tm+1,0).getDate();
-  const startDow=(firstDay.getDay()||7)-1;
+  }));
+  const first=new Date(ty,tm,1),dim=new Date(ty,tm+1,0).getDate(),sdow=(first.getDay()||7)-1;
   let html=`<div class="card"><div class="cal-grid">`;
   DAYS_FR.forEach(d=>html+=`<div class="cal-head">${d}</div>`);
-  for(let i=0;i<startDow;i++)html+=`<div class="cal-day empty"></div>`;
-  for(let day=1;day<=daysInMonth;day++){
-    const date=new Date(ty,tm,day);
-    const dw=date.getDay()||7;
-    const mon=new Date(date);mon.setDate(date.getDate()-dw+1);
-    const wk=mon.toISOString().slice(0,10);
-    const s=dayStatus[wk]||{done:0,tot:0};
-    const isFuture=date>today;
+  for(let i=0;i<sdow;i++)html+=`<div class="cal-day empty"></div>`;
+  for(let day=1;day<=dim;day++){
+    const date=new Date(ty,tm,day),dw=date.getDay()||7,mon=new Date(date);mon.setDate(date.getDate()-dw+1);
+    const wk=mon.toISOString().slice(0,10),s=ds[wk]||{done:0,tot:0},isFuture=date>nowD;
     const pct=s.tot?s.done/s.tot:0;
-    let cls=isFuture?'cal-day future':s.tot===0?'cal-day future':pct>=1?'cal-day ok':pct>0?'cal-day partial':'cal-day miss';
+    const cls=isFuture?'future':s.tot===0?'future':pct>=1?'ok':pct>0?'partial':'miss';
     const dotCol=pct>=1?'#2d6a4f':pct>0?'#e6a817':'#cc3333';
-    html+=`<div class="${cls}"><div class="day-num">${day}</div>${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${dotCol}"></div>`:''}</div>`;
+    html+=`<div class="cal-day ${cls}"><div class="day-num">${day}</div>${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${dotCol}"></div>`:''}</div>`;
   }
-  html+=`</div>
-  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+  html+=`</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
     <div class="li"><div class="ld" style="background:#2d6a4f"></div><span style="font-size:11px">Toutes faites</span></div>
     <div class="li"><div class="ld" style="background:#e6a817"></div><span style="font-size:11px">Partielles</span></div>
     <div class="li"><div class="ld" style="background:#cc3333"></div><span style="font-size:11px">Non faites</span></div>
   </div></div>`;
   document.getElementById('bilan-content').innerHTML=html;
 }
-
 function renderAll(){
   if(currentScreen==='planning')renderPlanning();
   else if(currentScreen==='bilan')renderBilan();
-  else if(currentScreen==='manage')renderManage();
+  else renderManage();
 }
-
-// ── Room select new room ───────────────────────────────────────────
 document.addEventListener('change',async e=>{
   if(e.target.id==='new-task-room'&&e.target.value==='__new'){
     const name=prompt('Nom de la nouvelle pièce :');
     if(name&&name.trim()){
-      const r=name.trim();
-      if(!roomOrder.includes(r))roomOrder.push(r);
+      const r=name.trim();if(!roomOrder.includes(r))roomOrder.push(r);
       await save();renderManage();
       e.target.innerHTML='<option value="">Pièce...</option>';
       getAllRooms().forEach(rr=>e.target.innerHTML+=`<option value="${rr}">${rr}</option>`);
       e.target.innerHTML+=`<option value="__new">+ Nouvelle pièce...</option>`;
       e.target.value=r;
-    }else{e.target.value='';}
+    }else e.target.value='';
   }
 });
-
-// Close menu on outside click
-document.addEventListener('click',e=>{
-  if(openMenu&&!e.target.closest('.freq-picker')&&!e.target.classList.contains('ftag')){closeMenu();}
-});
-
-// Initial render (before Firestore loads)
+document.addEventListener('click',e=>{if(openMenu&&!e.target.classList.contains('ftag'))closeMenu();});
 renderPlanning();
 </script>
 </body>
