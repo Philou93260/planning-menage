@@ -12,123 +12,108 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f0f4f2;color:#1a1a2e;min-height:100vh;padding-bottom:80px}
-
-/* NAV BAR */
 .topbar{background:#2d6a4f;color:white;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
 .topbar-icon{font-size:22px}
 .topbar-title{font-size:17px;font-weight:700;flex:1}
 .topbar-sub{font-size:11px;opacity:.8}
-
-/* BOTTOM TAB BAR */
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#aaa;flex-shrink:0;transition:background .3s}
+.sync-dot.ok{background:#4ade80}
+.sync-dot.sync{background:#facc15;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .tabbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e0e0e0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 6px;cursor:pointer;font-size:10px;color:#999;font-weight:500;gap:3px;border:none;background:transparent;-webkit-appearance:none}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 6px;cursor:pointer;font-size:10px;color:#999;font-weight:500;gap:3px;border:none;background:transparent}
 .tab.on{color:#2d6a4f}
 .tab-ico{font-size:20px;line-height:1}
-
 .app{max-width:600px;margin:0 auto;padding:10px}
 .card{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:14px;margin-bottom:10px}
-
-/* SCREENS */
 .screen{display:none}
 .screen.on{display:block}
-
-/* WEEK NAV */
 .week-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .week-nav button{background:#edf7f1;color:#2d6a4f;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
 .week-nav button.today{background:#2d6a4f;color:white;padding:6px 10px;font-size:11px}
-.week-nav button:active{opacity:.7}
 .week-label{flex:1;text-align:center;font-size:13px;font-weight:600}
-
 .prog-bar{height:8px;background:#e8f5e9;border-radius:4px;overflow:hidden}
 .prog-fill{height:100%;background:#2d6a4f;border-radius:4px;transition:width .35s}
 .prog-txt{font-size:11px;color:#888;text-align:right;margin-top:4px}
-
 .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 .li{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
 .ld{width:8px;height:8px;border-radius:50%}
-
 .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .fb{font-size:12px;padding:5px 12px;border-radius:20px;border:1.5px solid #ddd;cursor:pointer;background:#fff;color:#555;font-weight:500}
 .fb.on{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
-
-.room-block{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);overflow:hidden;margin-bottom:8px}
+.room-block{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;overflow:hidden}
 .room-hdr{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
 .room-ico{font-size:18px;width:26px;text-align:center}
 .room-name{font-weight:700;font-size:14px;flex:1}
 .room-badge{font-size:11px;padding:2px 9px;border-radius:10px;background:#d4edda;color:#155724;font-weight:700}
 .room-badge.full{background:#2d6a4f;color:white}
-
-.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #f0f0f0}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #f0f0f0;position:relative}
 .chk{width:24px;height:24px;border-radius:7px;border:2px solid #bbb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:700;color:white;transition:all .15s}
 .chk.on{background:#2d6a4f;border-color:#2d6a4f}
 .task-name{flex:1;font-size:14px}
 .task-name.struck{text-decoration:line-through;color:#bbb}
-
-.ftag{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;font-weight:600;flex-shrink:0;border:1px solid transparent}
+/* freq badge */
+.ftag{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;font-weight:600;flex-shrink:0;border:1px solid transparent;user-select:none}
 .fhebdo{background:#e3f0fb;color:#1a5a9a;border-color:#90c4ef}
 .fbimens{background:#edf7f0;color:#1a7a4a;border-color:#80cfa0}
 .fmensuel{background:#ede7f6;color:#5c35b5;border-color:#b39ddb}
-
+/* dropdown — fixed position to avoid clipping */
 .freq-picker{position:relative;display:inline-flex}
-.freq-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:200;overflow:hidden;min-width:150px}
+.freq-menu{position:fixed;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:500;overflow:hidden;min-width:150px}
 .freq-menu.hide{display:none}
 .freq-opt{padding:10px 16px;font-size:13px;cursor:pointer;font-weight:500}
 .freq-opt:active{background:#f0f7f4}
 .freq-opt.sel{color:#2d6a4f;font-weight:700}
 .freq-opt+.freq-opt{border-top:1px solid #f0f0f0}
-
-.bi-weeks{display:flex;gap:8px;padding:6px 14px 10px 48px;flex-wrap:wrap}
-.wk-btn{padding:5px 14px;border-radius:16px;border:1.5px solid #bbb;cursor:pointer;font-size:12px;color:#555;background:#fff;font-weight:600}
-.wk-btn.on{background:#2d6a4f;color:white;border-color:#2d6a4f}
-
-/* GESTION DES TÂCHES */
+/* bi-mensuel target date */
+.bi-target{display:flex;align-items:center;gap:8px;padding:6px 14px 10px 48px;flex-wrap:wrap}
+.bi-chk{width:22px;height:22px;border-radius:6px;border:2px solid #80cfa0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
+.bi-chk.on{background:#1a7a4a;border-color:#1a7a4a}
+.bi-label{font-size:12px;color:#555;font-weight:500}
+/* mensuel target */
+.mens-target{display:flex;align-items:center;gap:8px;padding:6px 14px 10px 48px}
+.mens-chk{width:22px;height:22px;border-radius:6px;border:2px solid #b39ddb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
+.mens-chk.on{background:#5c35b5;border-color:#5c35b5}
+.mens-label{font-size:12px;color:#555;font-weight:500}
+/* manage */
 .manage-room{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
-.manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer}
+.manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
 .manage-room-hdr .room-name{flex:1;font-weight:700;font-size:14px}
 .manage-task-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid #f5f5f5}
 .manage-task-name{flex:1;font-size:13px}
 .del-btn{width:28px;height:28px;border-radius:50%;background:#fff0f0;border:1px solid #ffcccc;color:#cc3333;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.del-btn:active{background:#ffdddd}
 .add-task-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid #f0f0f0;background:#fafff9}
 .add-task-row input{flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none}
 .add-task-row input:focus{border-color:#2d6a4f}
 .add-task-row button{background:#2d6a4f;color:white;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
-
 .add-room-form{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);padding:14px;margin-bottom:10px}
 .add-room-form h3{font-size:14px;font-weight:700;margin-bottom:10px;color:#2d6a4f}
 .form-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .form-row input,.form-row select{flex:1;min-width:120px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none}
 .form-row input:focus,.form-row select:focus{border-color:#2d6a4f}
 .form-row button{background:#2d6a4f;color:white;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600}
-
-/* VUE MENSUELLE */
+/* bilan */
 .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .month-nav button{background:#edf7f1;color:#2d6a4f;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
 .month-label{flex:1;text-align:center;font-size:15px;font-weight:700}
-
 .view-tabs{display:flex;gap:6px;margin-bottom:12px}
 .vtab{flex:1;text-align:center;padding:7px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;border:1.5px solid #ddd;background:#fff;color:#666}
 .vtab.on{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
-
-/* Vue récap semaines */
 .recap-week{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;overflow:hidden}
-.recap-week-hdr{display:flex;align-items:center;padding:10px 14px;background:#f0f7f4;gap:10px}
+.recap-week-hdr{display:flex;align-items:center;padding:10px 14px;background:#f0f7f4;gap:10px;cursor:pointer}
 .recap-week-lbl{font-weight:700;font-size:13px;flex:1}
 .recap-pct{font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}
+.recap-reset{font-size:11px;padding:4px 10px;border-radius:8px;background:#fff;border:1px solid #2d6a4f;color:#2d6a4f;cursor:pointer;font-weight:600;margin-left:4px}
 .recap-task-row{display:flex;align-items:center;padding:8px 14px;border-top:1px solid #f5f5f5;gap:10px}
 .recap-task-name{flex:1;font-size:13px}
 .status-icon{font-size:16px;flex-shrink:0}
-
-/* Vue liste non faites */
 .missed-room{background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;overflow:hidden}
 .missed-room-hdr{padding:10px 14px;background:#fff5f5;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
 .missed-task{padding:8px 14px;border-top:1px solid #f5f5f5;font-size:13px;display:flex;gap:8px;align-items:center}
 .missed-week-tag{font-size:10px;padding:2px 7px;border-radius:8px;background:#ffe0e0;color:#cc3333;font-weight:600;flex-shrink:0}
-
-/* Vue calendrier */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px}
 .cal-head{text-align:center;font-size:10px;font-weight:700;color:#666;padding:4px 0}
-.cal-day{border-radius:8px;padding:4px 2px;text-align:center;cursor:default;min-height:44px}
+.cal-day{border-radius:8px;padding:4px 2px;text-align:center;min-height:40px}
 .cal-day .day-num{font-size:11px;font-weight:600;margin-bottom:2px}
 .cal-day.empty{opacity:0}
 .cal-day.ok{background:#e8f5e9}
@@ -136,8 +121,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .cal-day.partial{background:#fff8e1}
 .cal-day.future{background:#f5f5f5;color:#bbb}
 .cal-dot{width:5px;height:5px;border-radius:50%;margin:1px auto}
-
 .empty-state{text-align:center;padding:2rem;color:#aaa;font-size:14px}
+.loading{text-align:center;padding:2rem;color:#888;font-size:14px}
 footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
 </style>
 </head>
@@ -145,15 +130,16 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
 
 <div class="topbar">
   <span class="topbar-icon">🧹</span>
-  <div>
+  <div style="flex:1">
     <div class="topbar-title">Planning Ménage</div>
     <div class="topbar-sub" id="topweek"></div>
   </div>
+  <div class="sync-dot" id="syncdot" title="Synchronisation"></div>
 </div>
 
 <div class="app">
 
-  <!-- ═══ ÉCRAN PLANNING ═══ -->
+  <!-- PLANNING -->
   <div class="screen on" id="screen-planning">
     <div class="card">
       <div class="week-nav">
@@ -181,29 +167,7 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
     <div id="rooms"></div>
   </div>
 
-  <!-- ═══ ÉCRAN GESTION ═══ -->
-  <div class="screen" id="screen-manage">
-    <div class="add-room-form">
-      <h3>➕ Ajouter une tâche</h3>
-      <div class="form-row">
-        <input id="new-task-name" placeholder="Nom de la tâche" />
-        <select id="new-task-room">
-          <option value="">Pièce...</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <select id="new-task-freq">
-          <option value="hebdo">Hebdomadaire</option>
-          <option value="bimens">Bi-mensuel</option>
-          <option value="mensuel">Mensuel</option>
-        </select>
-        <button onclick="addTask()">Ajouter</button>
-      </div>
-    </div>
-    <div id="manage-rooms"></div>
-  </div>
-
-  <!-- ═══ ÉCRAN BILAN MENSUEL ═══ -->
+  <!-- BILAN -->
   <div class="screen" id="screen-bilan">
     <div class="card">
       <div class="month-nav">
@@ -220,9 +184,27 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
     <div id="bilan-content"></div>
   </div>
 
+  <!-- GÉRER -->
+  <div class="screen" id="screen-manage">
+    <div class="add-room-form">
+      <h3>➕ Ajouter une tâche</h3>
+      <div class="form-row">
+        <input id="new-task-name" placeholder="Nom de la tâche" />
+        <select id="new-task-room"><option value="">Pièce...</option></select>
+      </div>
+      <div class="form-row">
+        <select id="new-task-freq">
+          <option value="hebdo">Hebdomadaire</option>
+          <option value="bimens">Bi-mensuel</option>
+          <option value="mensuel">Mensuel</option>
+        </select>
+        <button onclick="addTask()">Ajouter</button>
+      </div>
+    </div>
+    <div id="manage-rooms"></div>
+  </div>
 </div>
 
-<!-- TAB BAR -->
 <div class="tabbar">
   <button class="tab on" id="tab-planning" onclick="showScreen('planning')">
     <span class="tab-ico">📋</span>Planning
@@ -235,7 +217,24 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
   </button>
 </div>
 
-<script>
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",
+  authDomain: "planning-menage-c832d.firebaseapp.com",
+  projectId: "planning-menage-c832d",
+  storageBucket: "planning-menage-c832d.firebasestorage.app",
+  messagingSenderId: "1089776086126",
+  appId: "1:1089776086126:web:7318486e939eea4dbf8a7f"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// ── Constants ──────────────────────────────────────────────────────
 const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
 const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳'};
 const FREQS=['hebdo','bimens','mensuel'];
@@ -263,37 +262,67 @@ const DEFAULT_TASKS=[
   {id:'verr',    name:'Verrière',         rooms:['Salon'],freq:'mensuel'},
 ];
 
-let offset=0, filter='all', openMenu=null;
+// ── State ──────────────────────────────────────────────────────────
+let offset=0, filter='all', openMenu=null, openMenuTid=null, openMenuRoom=null;
 let monthOffset=0, bilanView='recap';
 let currentScreen='planning';
-let st={}, freqOv={}, customTasks=[], deletedIds=new Set(), roomOrder=[...DEFAULT_ROOMS];
+// Firestore data
+let checks={};      // {checkKey: true}
+let freqOv={};      // {taskId: freq}
+let customTasks=[]; // [{id,name,rooms,freq}]
+let deletedIds=[];  // [id or 'del_room_tid_room']
+let roomOrder=[...DEFAULT_ROOMS];
+let dbLoaded=false;
 
-function load(){
+// ── Firestore helpers ──────────────────────────────────────────────
+function setSyncDot(state){ // 'sync','ok','err'
+  const d=document.getElementById('syncdot');
+  d.className='sync-dot'+(state==='ok'?' ok':state==='sync'?' sync':'');
+}
+
+async function saveToFirestore(data){
+  setSyncDot('sync');
   try{
-    const r=localStorage.getItem('pm_v4');
-    if(r){
-      const d=JSON.parse(r);
-      st=d.st||{}; freqOv=d.freq||{};
-      customTasks=d.custom||[];
-      deletedIds=new Set(d.deleted||[]);
-      roomOrder=d.rooms||[...DEFAULT_ROOMS];
-    }
-  }catch(e){st={};freqOv={};customTasks=[];deletedIds=new Set();roomOrder=[...DEFAULT_ROOMS];}
-}
-function save(){
-  try{localStorage.setItem('pm_v4',JSON.stringify({st,freq:freqOv,custom:customTasks,deleted:[...deletedIds],rooms:roomOrder}));}catch(e){}
+    await setDoc(doc(db,'planning','shared'),data,{merge:true});
+    setSyncDot('ok');
+  }catch(e){setSyncDot('err');console.error(e);}
 }
 
+// Listen to real-time changes from Firestore
+onSnapshot(doc(db,'planning','shared'), snap=>{
+  if(snap.exists()){
+    const d=snap.data();
+    checks=d.checks||{};
+    freqOv=d.freq||{};
+    customTasks=d.custom||[];
+    deletedIds=d.deleted||[];
+    roomOrder=d.rooms||[...DEFAULT_ROOMS];
+  }
+  dbLoaded=true;
+  setSyncDot('ok');
+  renderAll();
+});
+
+async function save(){
+  await saveToFirestore({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
+}
+
+// ── Task helpers ───────────────────────────────────────────────────
 function getAllTasks(){
-  const base=DEFAULT_TASKS.filter(t=>!deletedIds.has(t.id)).map(t=>({...t,freq:freqOv[t.id]||t.freq}));
+  const base=DEFAULT_TASKS
+    .filter(t=>!deletedIds.includes(t.id))
+    .map(t=>({...t,freq:freqOv[t.id]||t.freq}));
   return [...base,...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))];
 }
 function getAllRooms(){
   const custom=customTasks.flatMap(t=>t.rooms).filter(r=>!roomOrder.includes(r));
   return [...roomOrder,...new Set(custom)];
 }
+function getTasksForRoom(room){
+  return getAllTasks().filter(t=>t.rooms.includes(room)&&!deletedIds.includes('del_room_'+t.id+'_'+room));
+}
 
-// ── Week utils ────────────────────────────────────────────────────
+// ── Week utils ─────────────────────────────────────────────────────
 function wkKey(o){
   const n=new Date(),dw=n.getDay()||7,m=new Date(n);
   m.setDate(n.getDate()-dw+1+o*7);
@@ -307,13 +336,43 @@ function wkLabel(o){
   if(o===-1)return`Sem. dernière · ${f(m)} – ${f(s)}`;
   return`${f(m)} – ${f(s)}`;
 }
-function ck(wk,tid,room,slot){return slot?`${wk}|${tid}|${room}|${slot}`:`${wk}|${tid}|${room}`;}
-function isOn(wk,tid,room,slot){return!!st[ck(wk,tid,room,slot)];}
-function toggle(wk,tid,room,slot){const k=ck(wk,tid,room,slot);st[k]=!st[k];if(!st[k])delete st[k];save();renderPlanning();}
 
+// ── Check keys ─────────────────────────────────────────────────────
+// hebdo:   wk|tid|room
+// bimens:  month_YYYY-MM|tid|room|A or B  (1st or 2nd fortnight)
+// mensuel: month_YYYY-MM|tid|room
+
+function getCurrentMonth(){
+  const n=new Date();
+  return n.toISOString().slice(0,7); // YYYY-MM
+}
+function getMonthKey(wk){
+  return 'month_'+wk.slice(0,7);
+}
+function ck(wk,tid,room,slot){
+  const tasks=getAllTasks();
+  const t=tasks.find(x=>x.id===tid);
+  const freq=t?t.freq:'hebdo';
+  if(freq==='bimens'){
+    const mk=getMonthKey(wk);
+    return slot?`${mk}|${tid}|${room}|${slot}`:`${mk}|${tid}|${room}|A`;
+  }
+  if(freq==='mensuel'){
+    return `${getMonthKey(wk)}|${tid}|${room}`;
+  }
+  return `${wk}|${tid}|${room}`;
+}
+function isOn(wk,tid,room,slot){return!!checks[ck(wk,tid,room,slot)];}
+
+async function toggle(wk,tid,room,slot){
+  const k=ck(wk,tid,room,slot);
+  if(checks[k])delete checks[k]; else checks[k]=true;
+  await save();
+}
+
+// ── Navigation ─────────────────────────────────────────────────────
 function cw(d,reset){offset=reset?0:offset+d;closeMenu();renderPlanning();}
 function cm(d){monthOffset+=d;renderBilan();}
-
 function sf(f){
   filter=f;
   ['all','todo','done','hebdo','bimens','mensuel'].forEach(id=>{
@@ -322,17 +381,6 @@ function sf(f){
   });
   closeMenu();renderPlanning();
 }
-
-function closeMenu(){if(openMenu){openMenu.classList.add('hide');openMenu=null;}}
-function toggleFreqMenu(tid,room){
-  const menu=document.getElementById(`fm-${tid}-${room}`);
-  if(!menu)return;
-  if(openMenu&&openMenu!==menu)openMenu.classList.add('hide');
-  menu.classList.toggle('hide');
-  openMenu=menu.classList.contains('hide')?null:menu;
-}
-function setFreq(tid,freq){freqOv[tid]=freq;save();closeMenu();renderPlanning();if(currentScreen==='manage')renderManage();}
-
 function showScreen(s){
   currentScreen=s;
   ['planning','manage','bilan'].forEach(id=>{
@@ -343,81 +391,134 @@ function showScreen(s){
   if(s==='bilan')renderBilan();
   if(s==='planning')renderPlanning();
 }
-
 function setView(v){
   bilanView=v;
-  ['recap','missed','cal'].forEach(id=>{
-    document.getElementById('vt-'+id).classList.toggle('on',id===v);
-  });
+  ['recap','missed','cal'].forEach(id=>document.getElementById('vt-'+id).classList.toggle('on',id===v));
   renderBilan();
 }
 
-// ── Add / Delete tasks ────────────────────────────────────────────
-function addTask(){
+// ── Dropdown menu (fixed position to avoid clipping) ──────────────
+function closeMenu(){
+  if(openMenu){openMenu.classList.add('hide');openMenu=null;openMenuTid=null;openMenuRoom=null;}
+}
+function toggleFreqMenu(tid,room,badgeEl){
+  const menu=document.getElementById(`fm-${tid}-${room}`);
+  if(!menu)return;
+  if(openMenu&&openMenu!==menu){openMenu.classList.add('hide');}
+  if(!menu.classList.contains('hide')){closeMenu();return;}
+  // Position the menu above or below the badge
+  const rect=badgeEl.getBoundingClientRect();
+  const spaceBelow=window.innerHeight-rect.bottom;
+  const menuH=130;
+  if(spaceBelow<menuH+10){
+    menu.style.top=(rect.top-menuH-6)+'px';
+  }else{
+    menu.style.top=(rect.bottom+6)+'px';
+  }
+  menu.style.left=Math.max(8,rect.right-150)+'px';
+  menu.classList.remove('hide');
+  openMenu=menu;openMenuTid=tid;openMenuRoom=room;
+}
+async function setFreq(tid,freq){
+  freqOv[tid]=freq;
+  await save();
+  closeMenu();
+}
+
+// ── Add/delete tasks ───────────────────────────────────────────────
+async function addTask(){
   const name=document.getElementById('new-task-name').value.trim();
   const room=document.getElementById('new-task-room').value;
   const freq=document.getElementById('new-task-freq').value;
-  if(!name||!room)return alert('Remplis le nom et la pièce !');
-  const id='custom_'+Date.now();
-  // Check if task with same name already exists → add room
+  if(!name||!room){alert('Remplis le nom et la pièce !');return;}
   const existing=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
   if(existing){if(!existing.rooms.includes(room))existing.rooms.push(room);}
-  else{customTasks.push({id,name,rooms:[room],freq});}
+  else{customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});}
   document.getElementById('new-task-name').value='';
-  save();renderManage();renderPlanning();
+  await save();renderManage();renderPlanning();
 }
-
-function deleteTaskFromRoom(tid,room){
-  // For default tasks: mark as deleted from that room
+async function deleteTaskFromRoom(tid,room){
   const def=DEFAULT_TASKS.find(t=>t.id===tid);
   if(def){
-    if(def.rooms.length===1){deletedIds.add(tid);}
-    else{
-      // We store room-level deletions
-      const key='del_room_'+tid+'_'+room;
-      deletedIds.add(key);
-    }
+    if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}
+    else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}
   }
-  // For custom tasks: remove room or whole task
   const ci=customTasks.findIndex(t=>t.id===tid);
   if(ci>=0){
-    const t=customTasks[ci];
-    t.rooms=t.rooms.filter(r=>r!==room);
-    if(t.rooms.length===0)customTasks.splice(ci,1);
+    customTasks[ci].rooms=customTasks[ci].rooms.filter(r=>r!==room);
+    if(customTasks[ci].rooms.length===0)customTasks.splice(ci,1);
   }
-  save();renderManage();renderPlanning();
+  await save();renderManage();renderPlanning();
+}
+async function quickAdd(room){
+  const inp=document.getElementById('it-'+room);
+  const name=inp.value.trim();if(!name)return;
+  const freq=document.getElementById('new-task-freq').value||'hebdo';
+  const existing=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
+  if(existing){if(!existing.rooms.includes(room))existing.rooms.push(room);}
+  else{customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});}
+  inp.value='';
+  await save();renderManage();renderPlanning();
 }
 
-function isDeleted(tid,room){
-  return deletedIds.has(tid)||deletedIds.has('del_room_'+tid+'_'+room);
-}
-
-function getTasksForRoom(room){
-  return getAllTasks().filter(t=>t.rooms.includes(room)&&!isDeleted(t.id,room));
-}
+// ── Expose globals ─────────────────────────────────────────────────
+window.cw=cw;window.cm=cm;window.sf=sf;window.showScreen=showScreen;window.setView=setView;
+window.toggleFreqMenu=toggleFreqMenu;window.setFreq=setFreq;
+window.addTask=addTask;window.deleteTaskFromRoom=deleteTaskFromRoom;window.quickAdd=quickAdd;
+window.tog=function(id){const el=document.getElementById(id);if(el)el.classList.toggle('hide');};
+window.doToggle=async function(wk,tid,room,slot){await toggle(wk,tid,room,slot);};
+window.markWeekDone=async function(wk){
+  const tasks=getAllTasks();
+  getAllRooms().forEach(room=>{
+    getTasksForRoom(room).forEach(t=>{
+      if(t.freq==='bimens'){
+        checks[ck(wk,t.id,room,'A')]=true;
+        checks[ck(wk,t.id,room,'B')]=true;
+      }else{
+        checks[ck(wk,t.id,room)]=true;
+      }
+    });
+  });
+  await save();
+};
+window.resetWeek=async function(wk){
+  // Remove all keys for this week
+  const tasks=getAllTasks();
+  getAllRooms().forEach(room=>{
+    getTasksForRoom(room).forEach(t=>{
+      if(t.freq==='bimens'){
+        delete checks[ck(wk,t.id,room,'A')];
+        delete checks[ck(wk,t.id,room,'B')];
+      }else{
+        delete checks[ck(wk,t.id,room)];
+      }
+    });
+  });
+  await save();
+};
 
 // ── RENDER PLANNING ────────────────────────────────────────────────
 function renderPlanning(){
+  if(!dbLoaded){document.getElementById('rooms').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
   const wk=wkKey(offset);
   const lbl=wkLabel(offset);
   document.getElementById('wl').textContent=lbl;
   document.getElementById('topweek').textContent=lbl;
 
-  const tasks=getAllTasks();
   let tot=0,done=0;
-  getAllRooms().forEach(room=>{
-    getTasksForRoom(room).forEach(t=>{
-      if(t.freq==='bimens'){['A','B'].forEach(s=>{tot++;if(isOn(wk,t.id,room,s))done++;});}
-      else{tot++;if(isOn(wk,t.id,room))done++;}
-    });
-  });
+  getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
+    if(t.freq==='bimens'){
+      ['A','B'].forEach(s=>{tot++;if(isOn(wk,t.id,room,s))done++;});
+    }else{tot++;if(isOn(wk,t.id,room))done++;}
+  }));
   const pct=tot?Math.round(done/tot*100):0;
   document.getElementById('pf').style.width=pct+'%';
   document.getElementById('pt').textContent=`${done} / ${tot} tâches · ${pct}%`;
 
   let html='';
   getAllRooms().forEach(room=>{
-    let filtered=getTasksForRoom(room).filter(t=>{
+    let tasks=getTasksForRoom(room);
+    let filtered=tasks.filter(t=>{
       if(filter==='hebdo')return t.freq==='hebdo';
       if(filter==='bimens')return t.freq==='bimens';
       if(filter==='mensuel')return t.freq==='mensuel';
@@ -427,14 +528,14 @@ function renderPlanning(){
       }
       if(filter==='todo'){
         if(t.freq==='bimens')return['A','B'].some(s=>!isOn(wk,t.id,room,s));
-        return !isOn(wk,t.id,room);
+        return!isOn(wk,t.id,room);
       }
       return true;
     });
     if(!filtered.length)return;
 
     let rd=0,rt=0;
-    getTasksForRoom(room).forEach(t=>{
+    tasks.forEach(t=>{
       if(t.freq==='bimens'){['A','B'].forEach(s=>{rt++;if(isOn(wk,t.id,room,s))rd++;});}
       else{rt++;if(isOn(wk,t.id,room))rd++;}
     });
@@ -450,20 +551,45 @@ function renderPlanning(){
 
     filtered.forEach(t=>{
       const isBi=t.freq==='bimens';
-      const chk=!isBi&&isOn(wk,t.id,room);
+      const isMens=t.freq==='mensuel';
+      const chk=(!isBi)&&isOn(wk,t.id,room);
+
+      // For mensuel: get current month label
+      const now=new Date();
+      const monthLabel=MONTHS_FR[now.getMonth()]+' '+now.getFullYear();
+      const biMonth=getMonthKey(wk).replace('month_','');
+      const [by,bm]=biMonth.split('-');
+      const biLabel=MONTHS_FR[parseInt(bm)-1]+' '+by;
+
       html+=`<div class="task-row">
-        ${isBi?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="toggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
+        ${(isBi||isMens)?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
         <span class="task-name${chk?' struck':''}">${t.name}</span>
-        <div class="freq-picker">
-          <span class="ftag ${FCLASS[t.freq]}" onclick="toggleFreqMenu('${t.id}','${room}')">${FLABELS[t.freq]} ▾</span>
+        <div class="freq-picker" style="position:static">
+          <span class="ftag ${FCLASS[t.freq]}" id="badge-${t.id}-${room}" onclick="toggleFreqMenu('${t.id}','${room}',this)">${FLABELS[t.freq]} ▾</span>
           <div class="freq-menu hide" id="fm-${t.id}-${room}">
             ${FREQS.map(f=>`<div class="freq-opt${t.freq===f?' sel':''}" onclick="setFreq('${t.id}','${f}')">${FLABELS[f]}</div>`).join('')}
           </div>
         </div>
       </div>`;
+
+      // Bi-mensuel: two checkboxes for current month (1st and 2nd fortnight)
       if(isBi){
-        html+=`<div class="bi-weeks">
-          ${['A','B'].map((s,i)=>{const dc=isOn(wk,t.id,room,s);return`<button class="wk-btn${dc?' on':''}" onclick="toggle('${wk}','${t.id}','${room}','${s}')">${i===0?'1ère quinzaine':'2e quinzaine'}</button>`;}).join('')}
+        const onA=isOn(wk,t.id,room,'A');
+        const onB=isOn(wk,t.id,room,'B');
+        html+=`<div class="bi-target">
+          <div class="bi-chk${onA?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','A')">${onA?'✓':''}</div>
+          <span class="bi-label">1ère quinzaine · ${biLabel}</span>
+          <div style="width:12px"></div>
+          <div class="bi-chk${onB?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','B')">${onB?'✓':''}</div>
+          <span class="bi-label">2e quinzaine</span>
+        </div>`;
+      }
+      // Mensuel: one checkbox for current month
+      if(isMens){
+        const onM=isOn(wk,t.id,room);
+        html+=`<div class="mens-target">
+          <div class="mens-chk${onM?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${onM?'✓':''}</div>
+          <span class="mens-label">Fait en ${monthLabel}</span>
         </div>`;
       }
     });
@@ -473,9 +599,8 @@ function renderPlanning(){
   document.getElementById('rooms').innerHTML=html||'<div class="empty-state">Aucune tâche.</div>';
 }
 
-// ── RENDER MANAGE ────────────────────────────────────────────────
+// ── RENDER MANAGE ──────────────────────────────────────────────────
 function renderManage(){
-  // Populate room select
   const sel=document.getElementById('new-task-room');
   sel.innerHTML='<option value="">Pièce...</option>';
   getAllRooms().forEach(r=>sel.innerHTML+=`<option value="${r}">${r}</option>`);
@@ -502,140 +627,98 @@ function renderManage(){
     html+=`<div class="add-task-row">
       <input placeholder="Nouvelle tâche..." id="it-${room}" onkeydown="if(event.key==='Enter')quickAdd('${room}')">
       <button onclick="quickAdd('${room}')">＋</button>
-    </div>`;
-    html+=`</div></div>`;
+    </div></div></div>`;
   });
   document.getElementById('manage-rooms').innerHTML=html||'<div class="empty-state">Aucune pièce.</div>';
 }
 
-function quickAdd(room){
-  const inp=document.getElementById('it-'+room);
-  const name=inp.value.trim();
-  if(!name)return;
-  const freq=document.getElementById('new-task-freq').value||'hebdo';
-  const id='custom_'+Date.now();
-  const existing=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
-  if(existing){if(!existing.rooms.includes(room))existing.rooms.push(room);}
-  else{customTasks.push({id,name,rooms:[room],freq});}
-  inp.value='';
-  save();renderManage();renderPlanning();
-}
-
-// Room select: handle new room
-document.addEventListener('change',e=>{
-  if(e.target.id==='new-task-room'&&e.target.value==='__new'){
-    const name=prompt('Nom de la nouvelle pièce :');
-    if(name&&name.trim()){
-      const r=name.trim();
-      if(!roomOrder.includes(r))roomOrder.push(r);
-      save();renderManage();
-      e.target.innerHTML='<option value="">Pièce...</option>';
-      getAllRooms().forEach(rr=>e.target.innerHTML+=`<option value="${rr}">${rr}</option>`);
-      e.target.innerHTML+=`<option value="__new">+ Nouvelle pièce...</option>`;
-      e.target.value=r;
-    }else{e.target.value='';}
-  }
-});
-
-// ── RENDER BILAN ────────────────────────────────────────────────
+// ── RENDER BILAN ───────────────────────────────────────────────────
 function getMonthWeeks(mo){
-  // Returns all week keys (mondays) that overlap with the month
   const now=new Date();
-  const year=now.getFullYear();
-  const m=now.getMonth()+monthOffset;
-  const targetDate=new Date(year,m,1);
-  const ty=targetDate.getFullYear(),tm=targetDate.getMonth();
-  const firstDay=new Date(ty,tm,1);
-  const lastDay=new Date(ty,tm+1,0);
-  // find monday of first week
+  const target=new Date(now.getFullYear(),now.getMonth()+mo,1);
+  const ty=target.getFullYear(),tm=target.getMonth();
+  const firstDay=new Date(ty,tm,1),lastDay=new Date(ty,tm+1,0);
   let mon=new Date(firstDay);
-  const dw=mon.getDay()||7;
-  mon.setDate(mon.getDate()-dw+1);
+  const dw=mon.getDay()||7;mon.setDate(mon.getDate()-dw+1);
   const weeks=[];
   while(mon<=lastDay){
     const sun=new Date(mon);sun.setDate(mon.getDate()+6);
     const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-    weeks.push({key:mon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun});
+    weeks.push({key:mon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
     mon.setDate(mon.getDate()+7);
   }
   return{weeks,ty,tm};
 }
 
 function renderBilan(){
+  if(!dbLoaded){document.getElementById('bilan-content').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
   const now=new Date();
-  const m=now.getMonth()+monthOffset;
-  const targetDate=new Date(now.getFullYear(),m,1);
-  document.getElementById('mlabel').textContent=`${MONTHS_FR[targetDate.getMonth()]} ${targetDate.getFullYear()}`;
-
-  const {weeks,ty,tm}=getMonthWeeks(monthOffset);
-  const tasks=getAllTasks();
-
-  if(bilanView==='recap') renderRecap(weeks,tasks,ty,tm);
-  else if(bilanView==='missed') renderMissed(weeks,tasks,ty,tm);
-  else renderCal(weeks,tasks,ty,tm);
+  const target=new Date(now.getFullYear(),now.getMonth()+monthOffset,1);
+  document.getElementById('mlabel').textContent=`${MONTHS_FR[target.getMonth()]} ${target.getFullYear()}`;
+  const{weeks,ty,tm}=getMonthWeeks(monthOffset);
+  if(bilanView==='recap')renderRecap(weeks,ty,tm);
+  else if(bilanView==='missed')renderMissed(weeks,ty,tm);
+  else renderCal(weeks,ty,tm);
 }
 
-function taskDoneForWeek(wk,task,room){
-  if(task.freq==='bimens'){
-    return['A','B'].every(s=>isOn(wk,task.id,room,s));
-  }
-  return isOn(wk,task.id,room);
-}
-function taskPartialForWeek(wk,task,room){
-  if(task.freq==='bimens'){
-    return['A','B'].some(s=>isOn(wk,task.id,room,s))&&!taskDoneForWeek(wk,task,room);
-  }
-  return false;
+function taskDone(wk,t,room){
+  if(t.freq==='bimens')return['A','B'].every(s=>isOn(wk,t.id,room,s));
+  return isOn(wk,t.id,room);
 }
 
-function renderRecap(weeks,tasks,ty,tm){
+function renderRecap(weeks,ty,tm){
   const today=new Date();
+  // Most recent first
+  const sorted=[...weeks].reverse();
   let html='';
-  weeks.forEach(w=>{
-    const isPast=w.sun<today;
+  sorted.forEach(w=>{
     const isFuture=w.mon>today;
     let wDone=0,wTot=0;
     const rows=[];
     getAllRooms().forEach(room=>{
       getTasksForRoom(room).forEach(t=>{
-        const done=taskDoneForWeek(w.key,t,room);
-        const partial=taskPartialForWeek(w.key,t,room);
-        if(t.freq==='bimens'){wTot+=2;wDone+=(['A','B'].filter(s=>isOn(w.key,t.id,room,s)).length);}
-        else{wTot++;if(done)wDone++;}
-        rows.push({name:`${t.name} · ${room}`,done,partial,future:isFuture});
+        if(t.freq==='bimens'){
+          ['A','B'].forEach(s=>{wTot++;if(isOn(w.key,t.id,room,s))wDone++;});
+          const dA=isOn(w.key,t.id,room,'A'),dB=isOn(w.key,t.id,room,'B');
+          rows.push({name:`${t.name} · ${room} (1ère)`,done:dA,future:isFuture});
+          rows.push({name:`${t.name} · ${room} (2e)`,done:dB,future:isFuture});
+        }else{
+          wTot++;const d=taskDone(w.key,t,room);if(d)wDone++;
+          rows.push({name:`${t.name} · ${room}`,done:d,future:isFuture});
+        }
       });
     });
     const pct=wTot?Math.round(wDone/wTot*100):0;
     const pctCol=pct>=80?'#2d6a4f':pct>=40?'#e6a817':'#cc3333';
     html+=`<div class="recap-week">
-      <div class="recap-week-hdr">
+      <div class="recap-week-hdr" onclick="tog('rw-${w.key}')">
         <span class="recap-week-lbl">${w.label}</span>
-        <span class="recap-pct" style="background:${pctCol}20;color:${pctCol}">${isFuture?'À venir':pct+'%'}</span>
+        ${!isFuture?`<span class="recap-pct" style="background:${pctCol}22;color:${pctCol}">${pct}%</span>
+        <button class="recap-reset" onclick="event.stopPropagation();markWeekDone('${w.key}')">✅ Tout fait</button>
+        <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();resetWeek('${w.key}')">↺</button>`
+        :'<span style="font-size:12px;color:#aaa">À venir</span>'}
       </div>`;
     if(!isFuture){
+      html+=`<div id="rw-${w.key}" class="hide">`;
       rows.forEach(r=>{
-        const ico=r.future?'⏳':r.done?'✅':r.partial?'🔶':'❌';
-        html+=`<div class="recap-task-row">
-          <span class="status-icon">${ico}</span>
-          <span class="recap-task-name">${r.name}</span>
-        </div>`;
+        const ico=r.future?'⏳':r.done?'✅':'❌';
+        html+=`<div class="recap-task-row"><span class="status-icon">${ico}</span><span class="recap-task-name">${r.name}</span></div>`;
       });
+      html+=`</div>`;
     }
     html+=`</div>`;
   });
   document.getElementById('bilan-content').innerHTML=html||'<div class="empty-state">Aucune donnée.</div>';
 }
 
-function renderMissed(weeks,tasks,ty,tm){
+function renderMissed(weeks,ty,tm){
   const today=new Date();
-  // Group missed by room
   const missedByRoom={};
   getAllRooms().forEach(room=>{
     getTasksForRoom(room).forEach(t=>{
       weeks.forEach(w=>{
         if(w.sun>=today)return;
-        const done=taskDoneForWeek(w.key,t,room);
-        if(!done){
+        if(!taskDone(w.key,t,room)){
           if(!missedByRoom[room])missedByRoom[room]=[];
           missedByRoom[room].push({task:t.name,week:w.label});
         }
@@ -644,28 +727,24 @@ function renderMissed(weeks,tasks,ty,tm){
   });
   let html='';
   Object.keys(missedByRoom).forEach(room=>{
-    if(!missedByRoom[room].length)return;
+    const items=missedByRoom[room];
+    if(!items.length)return;
     html+=`<div class="missed-room">
-      <div class="missed-room-hdr">${ICONS[room]||'🏠'} ${room} <span style="color:#cc3333;font-size:12px">(${missedByRoom[room].length} manquée${missedByRoom[room].length>1?'s':''})</span></div>`;
-    missedByRoom[room].forEach(m=>{
-      html+=`<div class="missed-task">
-        <span style="flex:1">${m.task}</span>
-        <span class="missed-week-tag">${m.week}</span>
-      </div>`;
+      <div class="missed-room-hdr">${ICONS[room]||'🏠'} ${room} <span style="color:#cc3333;font-size:12px">(${items.length} manquée${items.length>1?'s':''})</span></div>`;
+    items.forEach(m=>{
+      html+=`<div class="missed-task"><span style="flex:1">${m.task}</span><span class="missed-week-tag">${m.week}</span></div>`;
     });
     html+=`</div>`;
   });
   document.getElementById('bilan-content').innerHTML=html||'<div class="empty-state">🎉 Aucune tâche manquée ce mois !</div>';
 }
 
-function renderCal(weeks,tasks,ty,tm){
+function renderCal(weeks,ty,tm){
   const today=new Date();
-  // Build day-level status
-  const dayStatus={}; // key: YYYY-MM-DD → {done,tot}
+  const dayStatus={};
   getAllRooms().forEach(room=>{
     getTasksForRoom(room).forEach(t=>{
       weeks.forEach(w=>{
-        // Assign to mondays
         const d=w.key;
         if(!dayStatus[d])dayStatus[d]={done:0,tot:0};
         if(t.freq==='bimens'){
@@ -673,56 +752,66 @@ function renderCal(weeks,tasks,ty,tm){
           dayStatus[d].done+=(['A','B'].filter(s=>isOn(w.key,t.id,room,s)).length);
         }else{
           dayStatus[d].tot++;
-          if(taskDoneForWeek(w.key,t,room))dayStatus[d].done++;
+          if(taskDone(w.key,t,room))dayStatus[d].done++;
         }
       });
     });
   });
-
-  // Calendar grid
-  const firstDay=new Date(ty,tm,1);
-  const lastDay=new Date(ty,tm+1,0);
-  const startDow=(firstDay.getDay()||7)-1; // 0=Mon
-  const daysInMonth=lastDay.getDate();
-
-  let html=`<div class="card">`;
-  html+=`<div class="cal-grid">`;
+  const firstDay=new Date(ty,tm,1),daysInMonth=new Date(ty,tm+1,0).getDate();
+  const startDow=(firstDay.getDay()||7)-1;
+  let html=`<div class="card"><div class="cal-grid">`;
   DAYS_FR.forEach(d=>html+=`<div class="cal-head">${d}</div>`);
-  // Empty cells
   for(let i=0;i<startDow;i++)html+=`<div class="cal-day empty"></div>`;
   for(let day=1;day<=daysInMonth;day++){
     const date=new Date(ty,tm,day);
-    // Find the week key for this day
     const dw=date.getDay()||7;
     const mon=new Date(date);mon.setDate(date.getDate()-dw+1);
     const wk=mon.toISOString().slice(0,10);
     const s=dayStatus[wk]||{done:0,tot:0};
     const isFuture=date>today;
     const pct=s.tot?s.done/s.tot:0;
-    let cls='cal-day future';
-    if(!isFuture&&s.tot>0){
-      cls=pct>=1?'cal-day ok':pct>0?'cal-day partial':'cal-day miss';
-    }else if(!isFuture){cls='cal-day future';}
+    let cls=isFuture?'cal-day future':s.tot===0?'cal-day future':pct>=1?'cal-day ok':pct>0?'cal-day partial':'cal-day miss';
     const dotCol=pct>=1?'#2d6a4f':pct>0?'#e6a817':'#cc3333';
-    html+=`<div class="${cls}">
-      <div class="day-num">${day}</div>
-      ${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${dotCol}"></div>`:''}
-    </div>`;
+    html+=`<div class="${cls}"><div class="day-num">${day}</div>${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${dotCol}"></div>`:''}</div>`;
   }
-  html+=`</div>`;
-  html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+  html+=`</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
     <div class="li"><div class="ld" style="background:#2d6a4f"></div><span style="font-size:11px">Toutes faites</span></div>
     <div class="li"><div class="ld" style="background:#e6a817"></div><span style="font-size:11px">Partielles</span></div>
     <div class="li"><div class="ld" style="background:#cc3333"></div><span style="font-size:11px">Non faites</span></div>
-  </div>`;
-  html+=`</div>`;
+  </div></div>`;
   document.getElementById('bilan-content').innerHTML=html;
 }
 
-function tog(id){const el=document.getElementById(id);if(el)el.classList.toggle('hide');}
-document.addEventListener('click',e=>{if(openMenu&&!e.target.closest('.freq-picker')){closeMenu();renderPlanning();}});
+function renderAll(){
+  if(currentScreen==='planning')renderPlanning();
+  else if(currentScreen==='bilan')renderBilan();
+  else if(currentScreen==='manage')renderManage();
+}
 
-load();renderPlanning();
+// ── Room select new room ───────────────────────────────────────────
+document.addEventListener('change',async e=>{
+  if(e.target.id==='new-task-room'&&e.target.value==='__new'){
+    const name=prompt('Nom de la nouvelle pièce :');
+    if(name&&name.trim()){
+      const r=name.trim();
+      if(!roomOrder.includes(r))roomOrder.push(r);
+      await save();renderManage();
+      e.target.innerHTML='<option value="">Pièce...</option>';
+      getAllRooms().forEach(rr=>e.target.innerHTML+=`<option value="${rr}">${rr}</option>`);
+      e.target.innerHTML+=`<option value="__new">+ Nouvelle pièce...</option>`;
+      e.target.value=r;
+    }else{e.target.value='';}
+  }
+});
+
+// Close menu on outside click
+document.addEventListener('click',e=>{
+  if(openMenu&&!e.target.closest('.freq-picker')&&!e.target.classList.contains('ftag')){closeMenu();}
+});
+
+// Initial render (before Firestore loads)
+renderPlanning();
 </script>
 </body>
 </html>
