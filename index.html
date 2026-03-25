@@ -279,29 +279,32 @@ function ckM(tid,room){return`m|${tid}|${room}`;}
 
 function getCheckKey(tid,room,freq,slot){
   if(freq==='hebdo') return ckH(wkKey(offset),tid,room);
-  if(freq==='bimens') return ckB(tid,room,slot);
+  if(freq==='bimens') return ckB(tid,room,slot); // slot is always 'A' or 'B', never null
   return ckM(tid,room);
 }
 
 // ── Lock info ──────────────────────────────────────────────────────
+// Returns {done, locked, unlockDate}
+// When cooldown elapsed: auto-delete the expired check → task reappears fresh
 function lockInfo(key,freq){
   const c=checks[key];
   if(!c||!c.done)return{done:false,locked:false};
   const unlock=addDays(c.at,LOCKDAYS[freq]);
   if(todayStr()<unlock)return{done:true,locked:true,unlockDate:unlock};
-  return{done:true,locked:false};
+  // Cooldown elapsed → delete stale check so task shows as unchecked
+  delete checks[key];
+  return{done:false,locked:false};
 }
 
 // ── Check / Redo actions ───────────────────────────────────────────
 async function doCheck(tid,room,freq,slot){
-  const key=getCheckKey(tid,room,freq,slot);
+  const key=freq==='bimens'?ckB(tid,room,slot):freq==='mensuel'?ckM(tid,room):ckH(wkKey(offset),tid,room);
   if(checks[key]&&checks[key].done) delete checks[key];
   else checks[key]={done:true,at:todayStr()};
   await save();
 }
 async function doRedo(tid,room,freq,slot){
-  // Reset the checkedAt to today → restarts the cooldown from now
-  const key=getCheckKey(tid,room,freq,slot);
+  const key=freq==='bimens'?ckB(tid,room,slot):freq==='mensuel'?ckM(tid,room):ckH(wkKey(offset),tid,room);
   checks[key]={done:true,at:todayStr()};
   await save();
 }
@@ -488,15 +491,14 @@ function renderPlanning(){
       const freq=t.freq;
 
       if(freq==='hebdo'){
-        const key=getCheckKey(t.id,room,freq,null);
+        const key=ckH(wkKey(offset),t.id,room);
         const li=lockInfo(key,freq);
         html+=`<div class="task-row${li.locked?' locked-row':''}">
           <div class="chk${li.done?' on':''}${li.locked?' locked':''}"
-            ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}',null)"`:''}>
-            ${li.done?'✓':''}
+            ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','')"`:''}>${li.done?'✓':''}
           </div>
           <span class="task-name${li.done&&!li.locked?' struck':''}${li.locked?' locked-name':''}">${t.name}</span>
-          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}',null)">🔄</button>`:''}
+          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','')">🔄</button>`:''}
           ${fmenuHtml(t.id,room,freq)}
         </div>`;
         if(li.locked){
@@ -524,18 +526,17 @@ function renderPlanning(){
 
       }else{
         // mensuel
-        const key=getCheckKey(t.id,room,freq,null);
+        const key=ckM(t.id,room);
         const li=lockInfo(key,freq);
         html+=`<div class="task-row${li.locked?' locked-row':''}">
           <div style="width:24px;flex-shrink:0"></div>
           <span class="task-name${li.locked?' locked-name':''}">${t.name}</span>
-          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}',null)">🔄</button>`:''}
+          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','')">🔄</button>`:''}
           ${fmenuHtml(t.id,room,freq)}
         </div>
         <div class="mens-target">
           <div class="mens-chk${li.done?' on':''}${li.locked?' locked':''}"
-            ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}',null)"`:''}>
-            ${li.done?'✓':''}
+            ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','')"`:''}>${li.done?'✓':''}
           </div>
           <span class="bi-label${li.locked?' locked-lbl':''}">
             ${li.locked?`Fait · dispo le ${fmtDate(li.unlockDate)}`:li.done?'Fait ✓':'À faire ce mois'}
