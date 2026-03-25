@@ -278,29 +278,35 @@ function keyFor(tid,room,freq,slot){
 
 // ── Lock logic ────────────────────────────────────────────────────
 // Returns: {done, locked, unlockDate}
-// IMPORTANT: does NOT mutate checks — expiry handled in checkIsExpired()
+// expired checks are ignored at render time and cleaned up asynchronously
 function getLock(key,freq){
   const c=checks[key];
   if(!c||!c.done) return {done:false,locked:false};
   const unlock=addDays(c.at,LOCKDAYS[freq]);
   if(todayStr()<unlock) return {done:true,locked:true,unlockDate:unlock};
-  return {done:true,locked:false,expired:true};
+  // Expired: show as unchecked and schedule Firebase cleanup
+  scheduleCleanup();
+  return {done:false,locked:false};
 }
 
-// Call this before render to clean up expired checks and save once
-async function cleanExpiredChecks(){
-  let dirty=false;
-  Object.keys(checks).forEach(key=>{
-    const c=checks[key];
-    if(!c||!c.done) return;
-    // Determine freq from key prefix
-    let freq='hebdo';
-    if(key.startsWith('b|')) freq='bimens';
-    if(key.startsWith('m|')) freq='mensuel';
-    const unlock=addDays(c.at,LOCKDAYS[freq]);
-    if(todayStr()>=unlock){delete checks[key];dirty=true;}
-  });
-  if(dirty) await saveToFirebase();
+// Debounced cleanup: deletes expired keys then saves to Firebase once
+let _cleanTimer=null;
+function scheduleCleanup(){
+  if(_cleanTimer) return;
+  _cleanTimer=setTimeout(function(){
+    _cleanTimer=null;
+    var dirty=false;
+    Object.keys(checks).forEach(function(key){
+      var c=checks[key];
+      if(!c||!c.done) return;
+      var freq=key.startsWith('b|')?'bimens':key.startsWith('m|')?'mensuel':'hebdo';
+      var unlock=addDays(c.at,LOCKDAYS[freq]);
+      if(todayStr()>=unlock){delete checks[key];dirty=true;}
+    });
+    if(dirty){
+      docRef.set({checks:checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
+    }
+  }, 800);
 }
 
 // ── Date helpers ──────────────────────────────────────────────────
@@ -465,10 +471,10 @@ function renderPlanning(){
   let tot=0,done=0;
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
     if(t.freq==='bimens'){
-      ['A','B'].forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);if(!li.locked&&!li.expired){tot++;if(li.done)done++;}});
+      ['A','B'].forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);if(!li.locked){tot++;if(li.done)done++;}});
     }else{
       const li=getLock(keyFor(t.id,room,t.freq,null),t.freq);
-      if(!li.locked&&!li.expired){tot++;if(li.done)done++;}
+      if(!li.locked){tot++;if(li.done)done++;}
     }
   }));
   const pct=tot?Math.round(done/tot*100):0;
@@ -483,9 +489,9 @@ function renderPlanning(){
     let tasks=getTasksForRoom(room);
     if(roomFilter==='todo'){
       tasks=tasks.filter(t=>{
-        if(t.freq==='bimens') return ['A','B'].some(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);return !li.done||li.expired;});
+        if(t.freq==='bimens') return ['A','B'].some(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);return !li.done;});
         const li=getLock(keyFor(t.id,room,t.freq,null),t.freq);
-        return !li.done||li.expired;
+        return !li.done;
       });
     }
     if(!tasks.length)return;
@@ -494,10 +500,10 @@ function renderPlanning(){
     let allT=getTasksForRoom(room),rd=0,rt=0;
     allT.forEach(t=>{
       if(t.freq==='bimens'){
-        ['A','B'].forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);if(!li.expired){rt++;if(li.done&&li.locked)rd++;}});
+        ['A','B'].forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);rt++;if(li.done&&li.locked)rd++;});
       }else{
         const li=getLock(keyFor(t.id,room,t.freq,null),t.freq);
-        if(!li.expired){rt++;if(li.done&&li.locked)rd++;}
+        rt++;if(li.done&&li.locked)rd++;
       }
     });
     const full=rt>0&&rd===rt;
@@ -515,7 +521,7 @@ function renderPlanning(){
       if(freq==='hebdo'){
         const key=keyFor(t.id,room,freq,null);
         const li=getLock(key,freq);
-        // If expired, show as unchecked (clean state)
+        
         const showDone=li.done&&li.locked;
         html+='<div class="task-row'+(li.locked?' locked-row':'')+'">'
           +'<div class="chk'+(showDone?' on':'')+(li.locked?' locked':'')+'"'
@@ -723,8 +729,7 @@ document.addEventListener('click',function(e){
   if(openMenu&&!e.target.classList.contains('ftag'))closeMenu();
 });
 
-// Clean expired checks on load (runs after first onSnapshot)
-setTimeout(cleanExpiredChecks, 3000);
+// Expired checks are cleaned automatically by scheduleCleanup() called from getLock()
 
 </script>
 </body>
