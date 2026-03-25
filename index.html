@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planning Ménage</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f5f6fa;color:#1a1a2e;min-height:100vh}
+.app{max-width:700px;margin:0 auto;padding:12px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:16px;margin-bottom:12px}
+h1{font-size:18px;font-weight:700;color:#2d6a4f;display:flex;align-items:center;gap:8px}
+.week-nav{display:flex;align-items:center;gap:8px;margin:12px 0 6px}
+.week-nav button{background:#2d6a4f;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
+.week-nav button.sec{background:#edf7f1;color:#2d6a4f}
+.week-nav button:hover{opacity:.85}
+.week-label{flex:1;text-align:center;font-size:14px;font-weight:600;color:#1a1a2e}
+.prog-wrap{margin:8px 0 4px}
+.prog-bar{height:8px;background:#e8f5e9;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#2d6a4f,#52b788);border-radius:4px;transition:width .3s}
+.prog-txt{font-size:12px;color:#666;text-align:right;margin-top:3px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.fb{font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid #ddd;cursor:pointer;background:#fff;color:#555;font-weight:500}
+.fb.on{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
+.room-block{border:1px solid #e8f0e9;border-radius:12px;overflow:hidden;margin-bottom:8px}
+.room-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
+.room-ico{font-size:18px}
+.room-name{font-weight:700;font-size:14px;flex:1}
+.room-count{font-size:12px;padding:2px 9px;border-radius:10px;background:#d4edda;color:#155724;font-weight:600}
+.room-count.full{background:#c3e6cb;color:#155724}
+.room-body{}
+.room-body.hide{display:none}
+.task-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid #f0f0f0}
+.task-row:hover{background:#fafff9}
+.chk{width:22px;height:22px;border-radius:6px;border:2px solid #bbb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chk.on{background:#2d6a4f;border-color:#2d6a4f;color:#fff;font-size:13px;font-weight:700}
+.task-name{flex:1;font-size:13px}
+.task-name.struck{text-decoration:line-through;color:#aaa}
+.freq-tag{font-size:10px;padding:2px 8px;border-radius:10px;cursor:pointer;font-weight:600;flex-shrink:0}
+.fq{background:#fef3e2;color:#8b5e0a;border:1px solid #f6c96b}
+.fh{background:#e3f0fb;color:#1a5a9a;border:1px solid #90c4ef}
+.fm{background:#ede7f6;color:#5c35b5;border:1px solid #b39ddb}
+.days-wrap{display:flex;gap:5px;padding:5px 14px 10px 46px}
+.day-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid #ccc;cursor:pointer;font-size:11px;color:#666;background:#fff;font-weight:600;display:flex;align-items:center;justify-content:center}
+.day-btn.on{background:#2d6a4f;color:#fff;border-color:#2d6a4f}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#666;margin-top:8px}
+.ldot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px}
+footer{text-align:center;font-size:11px;color:#aaa;margin:16px 0 8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <h1>🏠 Planning Ménage</h1>
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)">◀</button>
+      <span class="week-label" id="wlabel"></span>
+      <button onclick="changeWeek(1)">▶</button>
+      <button class="sec" onclick="goNow()">Aujourd'hui</button>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+      <div class="prog-txt" id="ptxt">–</div>
+    </div>
+    <div class="legend">
+      <span><span class="ldot" style="background:#f6c96b"></span>Quotidien</span>
+      <span><span class="ldot" style="background:#90c4ef"></span>Hebdomadaire</span>
+      <span><span class="ldot" style="background:#b39ddb"></span>Mensuel</span>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="fb on" id="fa" onclick="setF('all')">Toutes</button>
+    <button class="fb" id="ftodo" onclick="setF('todo')">À faire</button>
+    <button class="fb" id="fdone" onclick="setF('done')">Faites</button>
+    <button class="fb" id="fhebdo" onclick="setF('hebdo')">Hebdo</button>
+    <button class="fb" id="fquot" onclick="setF('quot')">Quotidien</button>
+  </div>
+
+  <div id="rooms"></div>
+  <footer>Planning ménage · Données sauvegardées sur cet appareil</footer>
+</div>
+
+<script>
+const DAYS=['L','M','M','J','V','S','D'];
+const TASKS=[
+  {id:'sol',      name:'Sol',              rooms:['SdB','WC','Douche','Jules','Couloir','Chambre','Salon','Cuisine'], freq:'quot'},
+  {id:'glace',    name:'Glace',            rooms:['SdB','Douche','Couloir'],                                         freq:'hebdo'},
+  {id:'aeration', name:'Aération',         rooms:['SdB','WC','Douche','Cuisine'],                                    freq:'hebdo'},
+  {id:'draps',    name:'Draps',            rooms:['Jules','Chambre'],                                                freq:'hebdo'},
+  {id:'meuble',   name:'Meuble',           rooms:['Salon','Cuisine'],                                               freq:'hebdo'},
+  {id:'nuit',     name:'Table de nuit',    rooms:['Chambre'],                                                       freq:'hebdo'},
+  {id:'canape',   name:'Canapé',           rooms:['Desk'],                                                          freq:'hebdo'},
+  {id:'tv',       name:'TV',               rooms:['Salon'],                                                         freq:'hebdo'},
+  {id:'pouss',    name:'Poussière',        rooms:['Salon','Chambre','Jules','Desk'],                                 freq:'hebdo'},
+  {id:'wcnet',    name:'Nettoyage WC',     rooms:['WC'],                                                            freq:'hebdo'},
+  {id:'douchet',  name:'Nettoyage douche', rooms:['Douche'],                                                        freq:'hebdo'},
+  {id:'fenetre',  name:'Fenêtre',          rooms:['Jules','Desk','Chambre','Salon','Cuisine'],                      freq:'mens'},
+  {id:'mbhaut',   name:'Meuble haut',      rooms:['WC','Desk'],                                                     freq:'mens'},
+  {id:'derlit',   name:'Derrière le lit',  rooms:['Jules','Chambre'],                                               freq:'mens'},
+  {id:'four',     name:'Four',             rooms:['Cuisine'],                                                       freq:'mens'},
+  {id:'verr',     name:'Verrière',         rooms:['Salon'],                                                         freq:'mens'},
+];
+const ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
+const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳'};
+
+let offset=0, filter='all';
+let st={};
+
+function wkKey(o){
+  const n=new Date();
+  const d=n.getDay()||7;
+  const mon=new Date(n);
+  mon.setDate(n.getDate()-d+1+o*7);
+  return mon.toISOString().slice(0,10);
+}
+function wkLabel(o){
+  const k=wkKey(o);
+  const mon=new Date(k);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  if(o===0)return`Cette semaine · ${f(mon)} – ${f(sun)}`;
+  if(o===-1)return`Semaine dernière · ${f(mon)} – ${f(sun)}`;
+  return`${f(mon)} – ${f(sun)}`;
+}
+function load(){try{const r=localStorage.getItem('pm_v1');if(r)st=JSON.parse(r);}catch(e){st={};}}
+function save(){try{localStorage.setItem('pm_v1',JSON.stringify(st));}catch(e){}}
+function key(wk,tid,room,di){return di!==undefined?`${wk}|${tid}|${room}|${di}`:`${wk}|${tid}|${room}`;}
+function isOn(wk,tid,room,di){return!!st[key(wk,tid,room,di)];}
+function toggle(wk,tid,room,di){const k=key(wk,tid,room,di);st[k]=!st[k];if(!st[k])delete st[k];save();render();}
+function changeWeek(d){offset+=d;render();}
+function goNow(){offset=0;render();}
+function setF(f){
+  filter=f;
+  ['all','todo','done','hebdo','quot'].forEach(id=>{
+    const el=document.getElementById('f'+(id==='all'?'a':id));
+    if(el)el.classList.toggle('on',id===f);
+  });
+  render();
+}
+function cyclFreq(tid){
+  const order=['hebdo','quot','mens'];
+  const t=TASKS.find(x=>x.id===tid);
+  t.freq=order[(order.indexOf(t.freq)+1)%order.length];
+  render();
+}
+
+function render(){
+  const wk=wkKey(offset);
+  document.getElementById('wlabel').textContent=wkLabel(offset);
+
+  // progress
+  let tot=0,done=0;
+  TASKS.forEach(t=>t.rooms.forEach(r=>{
+    if(t.freq==='quot'){DAYS.forEach((_,i)=>{tot++;if(isOn(wk,t.id,r,i))done++;});}
+    else{tot++;if(isOn(wk,t.id,r))done++;}
+  }));
+  const pct=tot?Math.round(done/tot*100):0;
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('ptxt').textContent=`${done} / ${tot} tâches · ${pct}%`;
+
+  // rooms
+  const roomMap={};
+  ROOMS.forEach(r=>roomMap[r]=[]);
+  TASKS.forEach(t=>t.rooms.forEach(r=>{if(roomMap[r])roomMap[r].push(t);}));
+
+  let html='';
+  ROOMS.forEach(room=>{
+    const tasks=roomMap[room];
+    let filtered=tasks.filter(t=>{
+      if(filter==='hebdo')return t.freq==='hebdo';
+      if(filter==='quot')return t.freq==='quot';
+      if(filter==='done'){
+        if(t.freq==='quot')return DAYS.some((_,i)=>isOn(wk,t.id,room,i));
+        return isOn(wk,t.id,room);
+      }
+      if(filter==='todo'){
+        if(t.freq==='quot')return DAYS.some((_,i)=>!isOn(wk,t.id,room,i));
+        return !isOn(wk,t.id,room);
+      }
+      return true;
+    });
+    if(!filtered.length)return;
+
+    let rd=0,rt=0;
+    tasks.forEach(t=>{
+      if(t.freq==='quot'){DAYS.forEach((_,i)=>{rt++;if(isOn(wk,t.id,room,i))rd++;});}
+      else{rt++;if(isOn(wk,t.id,room))rd++;}
+    });
+    const full=rd===rt&&rt>0;
+
+    html+=`<div class="room-block">
+      <div class="room-hdr" onclick="tog('${room}')">
+        <span class="room-ico">${ICONS[room]||'🏠'}</span>
+        <span class="room-name">${room}</span>
+        <span class="room-count${full?' full':''}">${rd}/${rt}</span>
+      </div>
+      <div class="room-body" id="rb-${room}">`;
+
+    filtered.forEach(t=>{
+      const isQ=t.freq==='quot';
+      const chk=!isQ&&isOn(wk,t.id,room);
+      const fc=t.freq==='quot'?'fq':t.freq==='hebdo'?'fh':'fm';
+      const fl=t.freq==='quot'?'Quotidien':t.freq==='hebdo'?'Hebdo':'Mensuel';
+      html+=`<div class="task-row">
+        ${isQ?'<div style="width:22px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="toggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
+        <span class="task-name${chk?' struck':''}">${t.name}</span>
+        <span class="freq-tag ${fc}" onclick="cyclFreq('${t.id}')" title="Changer">${fl}</span>
+      </div>`;
+      if(isQ){
+        html+=`<div class="days-wrap">`;
+        DAYS.forEach((d,i)=>{
+          const dc=isOn(wk,t.id,room,i);
+          html+=`<button class="day-btn${dc?' on':''}" onclick="toggle('${wk}','${t.id}','${room}',${i})">${d}</button>`;
+        });
+        html+=`</div>`;
+      }
+    });
+    html+=`</div></div>`;
+  });
+
+  document.getElementById('rooms').innerHTML=html||'<p style="text-align:center;color:#aaa;padding:2rem">Aucune tâche</p>';
+}
+
+function tog(room){
+  const el=document.getElementById('rb-'+room);
+  if(el)el.classList.toggle('hide');
+}
+
+load();
+render();
+</script>
+</body>
+</html>
