@@ -46,8 +46,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .room-name{font-weight:700;font-size:14px;flex:1}
 .room-badge{font-size:11px;padding:2px 9px;border-radius:10px;background:#d4edda;color:#155724;font-weight:700}
 .room-badge.full{background:#2d6a4f;color:white}
-
-/* Task rows */
 .task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #f0f0f0}
 .task-row.locked-row{background:#fafafa}
 .chk{width:24px;height:24px;border-radius:7px;border:2px solid #bbb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:700;color:white;transition:all .15s}
@@ -56,14 +54,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .task-name{flex:1;font-size:14px}
 .task-name.struck{text-decoration:line-through;color:#bbb}
 .task-name.locked-name{color:#aaa}
-
-/* Locked info row */
-.locked-info{display:flex;align-items:center;gap:8px;padding:4px 14px 10px 48px}
+.locked-info{display:flex;align-items:center;gap:8px;padding:2px 14px 10px 48px}
 .locked-date{font-size:11px;color:#aaa;flex:1}
-.redo-btn{background:transparent;border:none;cursor:pointer;font-size:18px;padding:2px 6px;border-radius:8px;line-height:1;transition:transform .3s}
-.redo-btn:active{transform:rotate(180deg)}
-
-/* freq badge */
+.redo-btn{background:transparent;border:none;cursor:pointer;font-size:18px;padding:2px 4px;line-height:1}
 .ftag{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;font-weight:600;flex-shrink:0;border:1px solid transparent;user-select:none}
 .fhebdo{background:#e3f0fb;color:#1a5a9a;border-color:#90c4ef}
 .fbimens{background:#edf7f0;color:#1a7a4a;border-color:#80cfa0}
@@ -74,8 +67,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .freq-opt:active{background:#f0f7f4}
 .freq-opt.sel{color:#2d6a4f;font-weight:700}
 .freq-opt+.freq-opt{border-top:1px solid #f0f0f0}
-
-/* bi / mensuel sub-rows */
 .bi-target{display:flex;align-items:center;gap:8px;padding:4px 14px 10px 48px;flex-wrap:wrap}
 .bi-chk{width:22px;height:22px;border-radius:6px;border:2px solid #80cfa0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
 .bi-chk.on{background:#1a7a4a;border-color:#1a7a4a}
@@ -86,8 +77,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .mens-chk{width:22px;height:22px;border-radius:6px;border:2px solid #b39ddb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
 .mens-chk.on{background:#5c35b5;border-color:#5c35b5}
 .mens-chk.locked{background:#e8e8e8;border-color:#ccc;cursor:default}
-
-/* manage */
 .manage-room{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
 .manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
 .manage-room-hdr .room-name{flex:1;font-weight:700;font-size:14px}
@@ -102,8 +91,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .form-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .form-row input,.form-row select{flex:1;min-width:120px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none}
 .form-row button{background:#2d6a4f;color:white;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600}
-
-/* bilan */
 .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .month-nav button{background:#edf7f1;color:#2d6a4f;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:600}
 .month-label{flex:1;text-align:center;font-size:15px;font-weight:700}
@@ -134,10 +121,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 <body>
 <div class="topbar">
   <span class="topbar-icon">🧹</span>
-  <div style="flex:1">
-    <div class="topbar-title">Planning Ménage</div>
-    <div class="topbar-sub" id="topweek"></div>
-  </div>
+  <div style="flex:1"><div class="topbar-title">Planning Ménage</div><div class="topbar-sub" id="topweek"></div></div>
   <div class="sync-dot" id="syncdot"></div>
 </div>
 <div class="app">
@@ -155,20 +139,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
         <div class="li"><div class="ld" style="background:#90c4ef"></div>Hebdo</div>
         <div class="li"><div class="ld" style="background:#80cfa0"></div>Bi-mensuel</div>
         <div class="li"><div class="ld" style="background:#b39ddb"></div>Mensuel</div>
-        <div class="li"><div class="ld" style="background:#e8e8e8"></div>Déjà fait · 🔄 pour refaire</div>
+        <div class="li"><div class="ld" style="background:#e0e0e0"></div>Déjà fait · 🔄 refaire</div>
       </div>
     </div>
-    <div class="filters">
-      <button class="fb on" id="fall" onclick="sf('all')">Toutes</button>
-      <button class="fb" id="ftodo" onclick="sf('todo')">À faire</button>
-      <button class="fb" id="fdone" onclick="sf('done')">Faites</button>
-      <button class="fb" id="fhebdo" onclick="sf('hebdo')">Hebdo</button>
-      <button class="fb" id="fbimens" onclick="sf('bimens')">Bi-mensuel</button>
-      <button class="fb" id="fmensuel" onclick="sf('mensuel')">Mensuel</button>
-    </div>
+    <div class="filters" id="room-filters"></div>
     <div id="rooms"></div>
   </div>
-
   <div class="screen" id="screen-bilan">
     <div class="card">
       <div class="month-nav">
@@ -184,12 +160,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
     </div>
     <div id="bilan-content"></div>
   </div>
-
   <div class="screen" id="screen-manage">
     <div class="add-room-form">
       <h3>➕ Ajouter une tâche</h3>
       <div class="form-row">
-        <input id="new-task-name" placeholder="Nom de la tâche" />
+        <input id="new-task-name" placeholder="Nom de la tâche"/>
         <select id="new-task-room"><option value="">Pièce...</option></select>
       </div>
       <div class="form-row">
@@ -204,7 +179,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
     <div id="manage-rooms"></div>
   </div>
 </div>
-
 <div class="tabbar">
   <button class="tab on" id="tab-planning" onclick="showScreen('planning')"><span class="tab-ico">📋</span>Planning</button>
   <button class="tab" id="tab-bilan" onclick="showScreen('bilan')"><span class="tab-ico">📊</span>Bilan</button>
@@ -214,7 +188,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,doc,setDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-const db=getFirestore(initializeApp({apiKey:"AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",authDomain:"planning-menage-c832d.firebaseapp.com",projectId:"planning-menage-c832d",storageBucket:"planning-menage-c832d.firebasestorage.app",messagingSenderId:"1089776086126",appId:"1:1089776086126:web:7318486e939eea4dbf8a7f"}));
+const db=getFirestore(initializeApp({
+  apiKey:"AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",
+  authDomain:"planning-menage-c832d.firebaseapp.com",
+  projectId:"planning-menage-c832d",
+  storageBucket:"planning-menage-c832d.firebasestorage.app",
+  messagingSenderId:"1089776086126",
+  appId:"1:1089776086126:web:7318486e939eea4dbf8a7f"
+}));
 
 const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
 const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳'};
@@ -244,10 +225,12 @@ const DEFAULT_TASKS=[
   {id:'verr',    name:'Verrière',         rooms:['Salon'],freq:'mensuel'},
 ];
 
-let offset=0,filter='all',openMenu=null;
-let monthOffset=0,bilanView='recap',currentScreen='planning';
-let checks={},freqOv={},customTasks=[],deletedIds=[],roomOrder=[...DEFAULT_ROOMS],dbLoaded=false;
+// ── State ──────────────────────────────────────────────────────────
+let offset=0, roomFilter='all', openMenu=null;
+let monthOffset=0, bilanView='recap', currentScreen='planning';
+let checks={}, freqOv={}, customTasks=[], deletedIds=[], roomOrder=[...DEFAULT_ROOMS], dbLoaded=false;
 
+// ── Firebase ───────────────────────────────────────────────────────
 function setSyncDot(s){const d=document.getElementById('syncdot');d.className='sync-dot'+(s==='ok'?' ok':s==='sync'?' sync':'');}
 async function save(){
   setSyncDot('sync');
@@ -259,9 +242,12 @@ onSnapshot(doc(db,'planning','shared'),snap=>{
   dbLoaded=true;setSyncDot('ok');renderAll();
 });
 
+// ── Task/room helpers ──────────────────────────────────────────────
 function getAllTasks(){
-  return[...DEFAULT_TASKS.filter(t=>!deletedIds.includes(t.id)).map(t=>({...t,freq:freqOv[t.id]||t.freq})),
-         ...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))];
+  return[
+    ...DEFAULT_TASKS.filter(t=>!deletedIds.includes(t.id)).map(t=>({...t,freq:freqOv[t.id]||t.freq})),
+    ...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))
+  ];
 }
 function getAllRooms(){
   return[...roomOrder,...new Set(customTasks.flatMap(t=>t.rooms).filter(r=>!roomOrder.includes(r)))];
@@ -270,7 +256,7 @@ function getTasksForRoom(room){
   return getAllTasks().filter(t=>t.rooms.includes(room)&&!deletedIds.includes('del_room_'+t.id+'_'+room));
 }
 
-// ── Date utils ─────────────────────────────────────────────────────
+// ── Date helpers ───────────────────────────────────────────────────
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function addDays(s,n){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
 function fmtDate(s){return new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});}
@@ -282,65 +268,72 @@ function wkLabel(o){
   if(o===-1)return`Sem. dernière · ${f(m)} – ${f(s)}`;
   return`${f(m)} – ${f(s)}`;
 }
-function getMonthKey(wk){return'month_'+wk.slice(0,7);}
 
-// ── Check key builders ─────────────────────────────────────────────
-// Hebdo: keyed by week (resets each week)
-// Bimens/Mensuel: keyed by tid+room+slot only — lockout handled by checkedAt date
-function ckH(wk,tid,room){return`${wk}|${tid}|${room}`;}
-function ckB(tid,room,slot){return`bimens|${tid}|${room}|${slot}`;}
-function ckM(tid,room){return`mensuel|${tid}|${room}`;}
+// ── Check keys ─────────────────────────────────────────────────────
+// Hebdo  → keyed by week + task + room  (resets each week naturally)
+// Bimens → keyed by "bimens|task|room|slot"  (global, lockout by date)
+// Mensuel→ keyed by "mensuel|task|room"       (global, lockout by date)
+function ckH(wk,tid,room){return`h|${wk}|${tid}|${room}`;}
+function ckB(tid,room,slot){return`b|${tid}|${room}|${slot}`;}
+function ckM(tid,room){return`m|${tid}|${room}`;}
+
+function getCheckKey(tid,room,freq,slot){
+  if(freq==='hebdo') return ckH(wkKey(offset),tid,room);
+  if(freq==='bimens') return ckB(tid,room,slot);
+  return ckM(tid,room);
+}
 
 // ── Lock info ──────────────────────────────────────────────────────
 function lockInfo(key,freq){
   const c=checks[key];
   if(!c||!c.done)return{done:false,locked:false};
   const unlock=addDays(c.at,LOCKDAYS[freq]);
-  const today=todayStr();
-  if(today<unlock)return{done:true,locked:true,unlockDate:unlock};
+  if(todayStr()<unlock)return{done:true,locked:true,unlockDate:unlock};
   return{done:true,locked:false};
 }
 
-function getKey(tid,room,freq,slot){
-  if(freq==='hebdo')return ckH(wkKey(offset),tid,room);
-  if(freq==='bimens')return ckB(tid,room,slot||'A');
-  return ckM(tid,room);
-}
-
-// ── Toggle / Redo ──────────────────────────────────────────────────
+// ── Check / Redo actions ───────────────────────────────────────────
 async function doCheck(tid,room,freq,slot){
-  const key=getKey(tid,room,freq,slot);
-  const c=checks[key];
-  if(c&&c.done)delete checks[key];
+  const key=getCheckKey(tid,room,freq,slot);
+  if(checks[key]&&checks[key].done) delete checks[key];
   else checks[key]={done:true,at:todayStr()};
   await save();
 }
-// Redo: reset checkedAt to today → new cooldown from today
 async function doRedo(tid,room,freq,slot){
-  const key=getKey(tid,room,freq,slot);
+  // Reset the checkedAt to today → restarts the cooldown from now
+  const key=getCheckKey(tid,room,freq,slot);
   checks[key]={done:true,at:todayStr()};
   await save();
 }
 
-// ── Nav ────────────────────────────────────────────────────────────
+// ── Navigation ─────────────────────────────────────────────────────
 function cw(d,reset){offset=reset?0:offset+d;closeMenu();renderPlanning();}
 function cm(d){monthOffset+=d;renderBilan();}
-function sf(f){
-  filter=f;
-  ['all','todo','done','hebdo','bimens','mensuel'].forEach(id=>{const el=document.getElementById('f'+id);if(el)el.classList.toggle('on',id===f);});
-  closeMenu();renderPlanning();
+function setRoomFilter(r){
+  roomFilter=r;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('on',b.dataset.room===r));
+  renderPlanning();
 }
 function showScreen(s){
   currentScreen=s;
-  ['planning','manage','bilan'].forEach(id=>{document.getElementById('screen-'+id).classList.toggle('on',id===s);document.getElementById('tab-'+id).classList.toggle('on',id===s);});
-  if(s==='manage')renderManage();else if(s==='bilan')renderBilan();else renderPlanning();
+  ['planning','manage','bilan'].forEach(id=>{
+    document.getElementById('screen-'+id).classList.toggle('on',id===s);
+    document.getElementById('tab-'+id).classList.toggle('on',id===s);
+  });
+  if(s==='manage')renderManage();
+  else if(s==='bilan')renderBilan();
+  else renderPlanning();
 }
-function setView(v){bilanView=v;['recap','missed','cal'].forEach(id=>document.getElementById('vt-'+id).classList.toggle('on',id===v));renderBilan();}
+function setView(v){
+  bilanView=v;
+  ['recap','missed','cal'].forEach(id=>document.getElementById('vt-'+id).classList.toggle('on',id===v));
+  renderBilan();
+}
 
-// ── Dropdown ───────────────────────────────────────────────────────
+// ── Freq dropdown ──────────────────────────────────────────────────
 function closeMenu(){if(openMenu){openMenu.classList.add('hide');openMenu=null;}}
 function toggleFreqMenu(tid,room,el){
-  const menu=document.getElementById(`fm-${tid}-${room}`);if(!menu)return;
+  const menu=document.getElementById('fm-'+tid+'-'+room);if(!menu)return;
   if(openMenu&&openMenu!==menu)openMenu.classList.add('hide');
   if(!menu.classList.contains('hide')){closeMenu();return;}
   const rect=el.getBoundingClientRect();
@@ -350,7 +343,7 @@ function toggleFreqMenu(tid,room,el){
 }
 async function setFreq(tid,freq){freqOv[tid]=freq;await save();closeMenu();}
 
-// ── Add/delete ─────────────────────────────────────────────────────
+// ── Add / delete tasks ─────────────────────────────────────────────
 async function addTask(){
   const name=document.getElementById('new-task-name').value.trim();
   const room=document.getElementById('new-task-room').value;
@@ -364,7 +357,10 @@ async function addTask(){
 }
 async function deleteTaskFromRoom(tid,room){
   const def=DEFAULT_TASKS.find(t=>t.id===tid);
-  if(def){if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}}
+  if(def){
+    if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}
+    else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}
+  }
   const ci=customTasks.findIndex(t=>t.id===tid);
   if(ci>=0){customTasks[ci].rooms=customTasks[ci].rooms.filter(r=>r!==room);if(!customTasks[ci].rooms.length)customTasks.splice(ci,1);}
   await save();renderManage();renderPlanning();
@@ -378,7 +374,7 @@ async function quickAdd(room){
   inp.value='';await save();renderManage();renderPlanning();
 }
 
-// Bilan helpers
+// ── Bilan bulk actions ─────────────────────────────────────────────
 async function markWeekDone(wk){
   const t=todayStr();
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(task=>{
@@ -397,16 +393,17 @@ async function resetWeek(wk){
   await save();
 }
 
-// Expose
-window.cw=cw;window.cm=cm;window.sf=sf;window.showScreen=showScreen;window.setView=setView;
+// ── Expose globals ─────────────────────────────────────────────────
+window.cw=cw;window.cm=cm;window.setRoomFilter=setRoomFilter;
+window.showScreen=showScreen;window.setView=setView;
 window.toggleFreqMenu=toggleFreqMenu;window.setFreq=setFreq;
 window.addTask=addTask;window.deleteTaskFromRoom=deleteTaskFromRoom;window.quickAdd=quickAdd;
 window.markWeekDone=markWeekDone;window.resetWeek=resetWeek;
 window.doCheck=doCheck;window.doRedo=doRedo;
 window.tog=id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide');};
 
-// ── RENDER PLANNING ────────────────────────────────────────────────
-function freqMenu(tid,room,freq){
+// ── Freq menu HTML helper ──────────────────────────────────────────
+function fmenuHtml(tid,room,freq){
   return`<div style="position:relative;display:inline-flex">
     <span class="ftag ${FCLASS[freq]}" onclick="toggleFreqMenu('${tid}','${room}',this)">${FLABELS[freq]} ▾</span>
     <div class="freq-menu hide" id="fm-${tid}-${room}">
@@ -415,42 +412,68 @@ function freqMenu(tid,room,freq){
   </div>`;
 }
 
+// ── RENDER FILTERS (room-based) ────────────────────────────────────
+function renderFilters(){
+  const rooms=getAllRooms();
+  let html=`<button class="fb${roomFilter==='all'?' on':''}" data-room="all" onclick="setRoomFilter('all')">Toutes</button>
+             <button class="fb${roomFilter==='todo'?' on':''}" data-room="todo" onclick="setRoomFilter('todo')">À faire</button>`;
+  rooms.forEach(r=>{
+    html+=`<button class="fb${roomFilter===r?' on':''}" data-room="${r}" onclick="setRoomFilter('${r}')">${r}</button>`;
+  });
+  document.getElementById('room-filters').innerHTML=html;
+}
+
+// ── RENDER PLANNING ────────────────────────────────────────────────
 function renderPlanning(){
   if(!dbLoaded){document.getElementById('rooms').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
   const wk=wkKey(offset),lbl=wkLabel(offset);
   document.getElementById('wl').textContent=lbl;
   document.getElementById('topweek').textContent=lbl;
+  renderFilters();
 
-  // Progress: count only non-locked tasks
+  // Progress on non-locked tasks
   let tot=0,done=0;
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
-    if(t.freq==='bimens'){['A','B'].forEach(s=>{const li=lockInfo(getKey(t.id,room,t.freq,s),t.freq);if(!li.locked){tot++;if(li.done)done++;}});}
-    else{const li=lockInfo(getKey(t.id,room,t.freq),t.freq);if(!li.locked){tot++;if(li.done)done++;}}
+    if(t.freq==='bimens'){
+      ['A','B'].forEach(s=>{const li=lockInfo(getCheckKey(t.id,room,t.freq,s),t.freq);if(!li.locked){tot++;if(li.done)done++;}});
+    }else{
+      const li=lockInfo(getCheckKey(t.id,room,t.freq),t.freq);if(!li.locked){tot++;if(li.done)done++;}
+    }
   }));
   const pct=tot?Math.round(done/tot*100):0;
   document.getElementById('pf').style.width=pct+'%';
   document.getElementById('pt').textContent=`${done} / ${tot} tâches disponibles · ${pct}%`;
 
+  // Which rooms to show
+  let roomsToShow=getAllRooms();
+  if(roomFilter==='todo'){
+    // Show all rooms but filter tasks
+  }else if(roomFilter!=='all'){
+    roomsToShow=roomsToShow.filter(r=>r===roomFilter);
+  }
+
   let html='';
-  getAllRooms().forEach(room=>{
-    const tasks=getTasksForRoom(room);
-    const filtered=tasks.filter(t=>{
-      if(filter==='hebdo')return t.freq==='hebdo';
-      if(filter==='bimens')return t.freq==='bimens';
-      if(filter==='mensuel')return t.freq==='mensuel';
-      // done / todo: based on non-locked state
-      const li=t.freq==='bimens'?lockInfo(getKey(t.id,room,t.freq,'A'),t.freq):lockInfo(getKey(t.id,room,t.freq),t.freq);
-      if(filter==='done')return li.done&&!li.locked;
-      if(filter==='todo')return!li.done||li.locked;
-      return true;
-    });
-    if(!filtered.length)return;
+  roomsToShow.forEach(room=>{
+    let tasks=getTasksForRoom(room);
+
+    // Filter tasks for "À faire"
+    if(roomFilter==='todo'){
+      tasks=tasks.filter(t=>{
+        if(t.freq==='bimens') return['A','B'].some(s=>!lockInfo(getCheckKey(t.id,room,t.freq,s),t.freq).done);
+        return!lockInfo(getCheckKey(t.id,room,t.freq),t.freq).done;
+      });
+    }
+    if(!tasks.length)return;
 
     // Badge: non-locked done / non-locked total
+    let allTasks=getTasksForRoom(room);
     let rd=0,rt=0;
-    tasks.forEach(t=>{
-      if(t.freq==='bimens'){['A','B'].forEach(s=>{const li=lockInfo(getKey(t.id,room,t.freq,s),t.freq);if(!li.locked){rt++;if(li.done)rd++;}});}
-      else{const li=lockInfo(getKey(t.id,room,t.freq),t.freq);if(!li.locked){rt++;if(li.done)rd++;}}
+    allTasks.forEach(t=>{
+      if(t.freq==='bimens'){
+        ['A','B'].forEach(s=>{const li=lockInfo(getCheckKey(t.id,room,t.freq,s),t.freq);if(!li.locked){rt++;if(li.done)rd++;}});
+      }else{
+        const li=lockInfo(getCheckKey(t.id,room,t.freq),t.freq);if(!li.locked){rt++;if(li.done)rd++;}
+      }
     });
     const full=rt>0&&rd===rt;
 
@@ -461,52 +484,62 @@ function renderPlanning(){
         <span class="room-badge${full?' full':''}">${rd}/${rt}</span>
       </div><div id="rb-${room}">`;
 
-    filtered.forEach(t=>{
-      const freq=t.freq,mk=getMonthKey(wkKey(offset));
+    tasks.forEach(t=>{
+      const freq=t.freq;
 
       if(freq==='hebdo'){
-        const key=getKey(t.id,room,freq);
+        const key=getCheckKey(t.id,room,freq,null);
         const li=lockInfo(key,freq);
         html+=`<div class="task-row${li.locked?' locked-row':''}">
-          <div class="chk${li.done?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}')"`:''}>${li.done?'✓':''}</div>
+          <div class="chk${li.done?' on':''}${li.locked?' locked':''}"
+            ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}',null)"`:''}>
+            ${li.done?'✓':''}
+          </div>
           <span class="task-name${li.done&&!li.locked?' struck':''}${li.locked?' locked-name':''}">${t.name}</span>
-          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}')" title="Refaire maintenant">🔄</button>`:''}
-          ${freqMenu(t.id,room,freq)}
+          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}',null)">🔄</button>`:''}
+          ${fmenuHtml(t.id,room,freq)}
         </div>`;
         if(li.locked){
-          html+=`<div class="locked-info"><span class="locked-date">✓ Fait · Prochaine dispo le ${fmtDate(li.unlockDate)}</span></div>`;
+          html+=`<div class="locked-info"><span class="locked-date">Fait · dispo le ${fmtDate(li.unlockDate)}</span></div>`;
         }
 
       }else if(freq==='bimens'){
         html+=`<div class="task-row">
           <div style="width:24px;flex-shrink:0"></div>
           <span class="task-name">${t.name}</span>
-          ${freqMenu(t.id,room,freq)}
+          ${fmenuHtml(t.id,room,freq)}
         </div>`;
         ['A','B'].forEach((slot,i)=>{
-          const key=getKey(t.id,room,freq,slot);
+          const key=getCheckKey(t.id,room,freq,slot);
           const li=lockInfo(key,freq);
           const lbl=i===0?'1ère quinzaine':'2e quinzaine';
           html+=`<div class="bi-target">
-            <div class="bi-chk${li.done?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','${slot}')"`:''}>${li.done?'✓':''}</div>
+            <div class="bi-chk${li.done?' on':''}${li.locked?' locked':''}"
+              ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','${slot}')"`:''}>${li.done?'✓':''}</div>
             <span class="bi-label${li.locked?' locked-lbl':''}">${lbl}</span>
-            ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','${slot}')" title="Refaire maintenant">🔄</button><span class="locked-date">→ ${fmtDate(li.unlockDate)}</span>`:''}
+            ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','${slot}')">🔄</button>
+              <span class="locked-date">dispo le ${fmtDate(li.unlockDate)}</span>`:''}
           </div>`;
         });
 
       }else{
         // mensuel
-        const key=getKey(t.id,room,freq);
+        const key=getCheckKey(t.id,room,freq,null);
         const li=lockInfo(key,freq);
         html+=`<div class="task-row${li.locked?' locked-row':''}">
           <div style="width:24px;flex-shrink:0"></div>
           <span class="task-name${li.locked?' locked-name':''}">${t.name}</span>
-          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}')" title="Refaire maintenant">🔄</button>`:''}
-          ${freqMenu(t.id,room,freq)}
+          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}',null)">🔄</button>`:''}
+          ${fmenuHtml(t.id,room,freq)}
         </div>
         <div class="mens-target">
-          <div class="mens-chk${li.done?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}')"`:''}>${li.done?'✓':''}</div>
-          <span class="mens-label${li.locked?' locked-lbl':''}">${li.locked?`Fait · Prochaine dispo le ${fmtDate(li.unlockDate)}`:li.done?'Fait ce mois ✓':'À faire ce mois'}</span>
+          <div class="mens-chk${li.done?' on':''}${li.locked?' locked':''}"
+            ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}',null)"`:''}>
+            ${li.done?'✓':''}
+          </div>
+          <span class="bi-label${li.locked?' locked-lbl':''}">
+            ${li.locked?`Fait · dispo le ${fmtDate(li.unlockDate)}`:li.done?'Fait ✓':'À faire ce mois'}
+          </span>
         </div>`;
       }
     });
@@ -566,25 +599,27 @@ function renderBilan(){
   else if(bilanView==='missed')renderMissed(weeks);
   else renderCal(weeks,ty,tm);
 }
+function isDoneB(tid,room){return['A','B'].every(s=>{const c=checks[ckB(tid,room,s)];return c&&c.done;});}
+function isDoneM(tid,room){const c=checks[ckM(tid,room)];return c&&c.done;}
+function isDoneH(wk,tid,room){const c=checks[ckH(wk,tid,room)];return c&&c.done;}
 function isDoneInBilan(wk,t,room){
-  if(t.freq==='bimens')return['A','B'].every(s=>{const c=checks[ckB(t.id,room,s)];return c&&c.done;});
-  if(t.freq==='mensuel'){const c=checks[ckM(t.id,room)];return c&&c.done;}
-  const c=checks[ckH(wk,t.id,room)];return c&&c.done;
+  if(t.freq==='bimens')return isDoneB(t.id,room);
+  if(t.freq==='mensuel')return isDoneM(t.id,room);
+  return isDoneH(wk,t.id,room);
 }
 function renderRecap(weeks){
   const nowD=new Date();let html='';
   [...weeks].reverse().forEach(w=>{
     const isFuture=w.mon>nowD;let wDone=0,wTot=0;const rows=[];
     getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
-      const mk=getMonthKey(w.key);
       if(t.freq==='bimens'){
         ['A','B'].forEach(s=>{wTot++;const c=checks[ckB(t.id,room,s)];if(c&&c.done)wDone++;});
         rows.push({name:`${t.name} · ${room} (1ère)`,done:!!(checks[ckB(t.id,room,'A')]&&checks[ckB(t.id,room,'A')].done)});
         rows.push({name:`${t.name} · ${room} (2e)`,done:!!(checks[ckB(t.id,room,'B')]&&checks[ckB(t.id,room,'B')].done)});
       }else if(t.freq==='mensuel'){
-        wTot++;const c=checks[ckM(t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
+        wTot++;const d=isDoneM(t.id,room);if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
       }else{
-        wTot++;const c=checks[ckH(w.key,t.id,room)];const d=c&&c.done;if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
+        wTot++;const d=isDoneH(w.key,t.id,room);if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
       }
     }));
     const pct=wTot?Math.round(wDone/wTot*100):0;
@@ -594,7 +629,8 @@ function renderRecap(weeks){
         <span class="recap-week-lbl">${w.label}</span>
         ${!isFuture?`<span class="recap-pct" style="background:${col}22;color:${col}">${pct}%</span>
         <button class="recap-reset" onclick="event.stopPropagation();markWeekDone('${w.key}')">✅ Tout fait</button>
-        <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();resetWeek('${w.key}')">↺</button>`:'<span style="font-size:12px;color:#aaa">À venir</span>'}
+        <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();resetWeek('${w.key}')">↺</button>`
+        :'<span style="font-size:12px;color:#aaa">À venir</span>'}
       </div>`;
     if(!isFuture){
       html+=`<div id="rw-${w.key}" class="hide">`;
@@ -606,16 +642,16 @@ function renderRecap(weeks){
   document.getElementById('bilan-content').innerHTML=html||'<div class="empty-state">Aucune donnée.</div>';
 }
 function renderMissed(weeks){
-  const nowD=new Date();const missedByRoom={};
+  const nowD=new Date();const mb={};
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
     weeks.forEach(w=>{
       if(w.sun>=nowD)return;
-      if(!isDoneInBilan(w.key,t,room)){if(!missedByRoom[room])missedByRoom[room]=[];missedByRoom[room].push({task:t.name,week:w.label});}
+      if(!isDoneInBilan(w.key,t,room)){if(!mb[room])mb[room]=[];mb[room].push({task:t.name,week:w.label});}
     });
   }));
   let html='';
-  Object.keys(missedByRoom).forEach(room=>{
-    const items=missedByRoom[room];if(!items.length)return;
+  Object.keys(mb).forEach(room=>{
+    const items=mb[room];if(!items.length)return;
     html+=`<div class="missed-room"><div class="missed-room-hdr">${ICONS[room]||'🏠'} ${room} <span style="color:#cc3333;font-size:12px">(${items.length} manquée${items.length>1?'s':''})</span></div>`;
     items.forEach(m=>html+=`<div class="missed-task"><span style="flex:1">${m.task}</span><span class="missed-week-tag">${m.week}</span></div>`);
     html+=`</div>`;
@@ -626,10 +662,10 @@ function renderCal(weeks,ty,tm){
   const nowD=new Date();const ds={};
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
     weeks.forEach(w=>{
-      if(!ds[w.key])ds[w.key]={done:0,tot:0};const mk=getMonthKey(w.key);
+      if(!ds[w.key])ds[w.key]={done:0,tot:0};
       if(t.freq==='bimens'){ds[w.key].tot+=2;ds[w.key].done+=['A','B'].filter(s=>{const c=checks[ckB(t.id,room,s)];return c&&c.done;}).length;}
-      else if(t.freq==='mensuel'){ds[w.key].tot++;const c=checks[ckM(t.id,room)];if(c&&c.done)ds[w.key].done++;}
-      else{ds[w.key].tot++;const c=checks[ckH(w.key,t.id,room)];if(c&&c.done)ds[w.key].done++;}
+      else if(t.freq==='mensuel'){ds[w.key].tot++;if(isDoneM(t.id,room))ds[w.key].done++;}
+      else{ds[w.key].tot++;if(isDoneH(w.key,t.id,room))ds[w.key].done++;}
     });
   }));
   const first=new Date(ty,tm,1),dim=new Date(ty,tm+1,0).getDate(),sdow=(first.getDay()||7)-1;
@@ -640,7 +676,7 @@ function renderCal(weeks,ty,tm){
     const date=new Date(ty,tm,day),dw=date.getDay()||7,mon=new Date(date);mon.setDate(date.getDate()-dw+1);
     const wk=mon.toISOString().slice(0,10),s=ds[wk]||{done:0,tot:0},isFuture=date>nowD;
     const pct=s.tot?s.done/s.tot:0;
-    const cls=isFuture?'future':s.tot===0?'future':pct>=1?'ok':pct>0?'partial':'miss';
+    const cls=isFuture||s.tot===0?'future':pct>=1?'ok':pct>0?'partial':'miss';
     const dotCol=pct>=1?'#2d6a4f':pct>0?'#e6a817':'#cc3333';
     html+=`<div class="cal-day ${cls}"><div class="day-num">${day}</div>${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${dotCol}"></div>`:''}</div>`;
   }
@@ -651,11 +687,13 @@ function renderCal(weeks,ty,tm){
   </div></div>`;
   document.getElementById('bilan-content').innerHTML=html;
 }
+
 function renderAll(){
   if(currentScreen==='planning')renderPlanning();
   else if(currentScreen==='bilan')renderBilan();
   else renderManage();
 }
+
 document.addEventListener('change',async e=>{
   if(e.target.id==='new-task-room'&&e.target.value==='__new'){
     const name=prompt('Nom de la nouvelle pièce :');
@@ -669,7 +707,10 @@ document.addEventListener('change',async e=>{
     }else e.target.value='';
   }
 });
-document.addEventListener('click',e=>{if(openMenu&&!e.target.classList.contains('ftag'))closeMenu();});
+document.addEventListener('click',e=>{
+  if(openMenu&&!e.target.classList.contains('ftag'))closeMenu();
+});
+
 renderPlanning();
 </script>
 </body>
