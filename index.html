@@ -56,7 +56,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .task-name.locked-name{color:#aaa}
 .locked-info{display:flex;align-items:center;gap:8px;padding:2px 14px 10px 48px}
 .locked-date{font-size:11px;color:#aaa;flex:1}
-.redo-btn{background:transparent;border:none;cursor:pointer;font-size:18px;padding:2px 4px;line-height:1}
+.redo-btn{background:#f0f0f0;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:16px;padding:6px 10px;line-height:1;min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center}
 .ftag{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;font-weight:600;flex-shrink:0;border:1px solid transparent;user-select:none}
 .fhebdo{background:#e3f0fb;color:#1a5a9a;border-color:#90c4ef}
 .fbimens{background:#edf7f0;color:#1a7a4a;border-color:#80cfa0}
@@ -498,7 +498,7 @@ function renderPlanning(){
             ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','')"`:''}>${li.done?'✓':''}
           </div>
           <span class="task-name${li.done&&!li.locked?' struck':''}${li.locked?' locked-name':''}">${t.name}</span>
-          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','')">🔄</button>`:''}
+          ${li.locked?`<button class="redo-btn" onclick="event.stopPropagation();doRedo('${t.id}','${room}','${freq}','')">🔄</button>`:''}
           ${fmenuHtml(t.id,room,freq)}
         </div>`;
         if(li.locked){
@@ -519,7 +519,7 @@ function renderPlanning(){
             <div class="bi-chk${li.done?' on':''}${li.locked?' locked':''}"
               ${!li.locked?`onclick="doCheck('${t.id}','${room}','${freq}','${slot}')"`:''}>${li.done?'✓':''}</div>
             <span class="bi-label${li.locked?' locked-lbl':''}">${lbl}</span>
-            ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','${slot}')">🔄</button>
+            ${li.locked?`<button class="redo-btn" onclick="event.stopPropagation();doRedo('${t.id}','${room}','${freq}','${slot}')">🔄</button>
               <span class="locked-date">dispo le ${fmtDate(li.unlockDate)}</span>`:''}
           </div>`;
         });
@@ -531,7 +531,7 @@ function renderPlanning(){
         html+=`<div class="task-row${li.locked?' locked-row':''}">
           <div style="width:24px;flex-shrink:0"></div>
           <span class="task-name${li.locked?' locked-name':''}">${t.name}</span>
-          ${li.locked?`<button class="redo-btn" onclick="doRedo('${t.id}','${room}','${freq}','')">🔄</button>`:''}
+          ${li.locked?`<button class="redo-btn" onclick="event.stopPropagation();doRedo('${t.id}','${room}','${freq}','')">🔄</button>`:''}
           ${fmenuHtml(t.id,room,freq)}
         </div>
         <div class="mens-target">
