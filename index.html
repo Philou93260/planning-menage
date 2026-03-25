@@ -180,11 +180,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
   <button class="tab" id="tab-manage" onclick="showScreen('manage')"><span class="tab-ico">⚙️</span>Gérer</button>
 </div>
 
-<!-- Firebase SDK (compat version — no module issues, works directly on window) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script>
-firebase.initializeApp({
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const _app = initializeApp({
   apiKey:"AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",
   authDomain:"planning-menage-c832d.firebaseapp.com",
   projectId:"planning-menage-c832d",
@@ -192,9 +192,19 @@ firebase.initializeApp({
   messagingSenderId:"1089776086126",
   appId:"1:1089776086126:web:7318486e939eea4dbf8a7f"
 });
-const db = firebase.firestore();
-const docRef = db.collection('planning').doc('shared');
+const db = getFirestore(_app);
+const docRef = doc(db, 'planning', 'shared');
 
+// Firebase save/load wrappers
+async function fbSave(data){ await setDoc(docRef, data, {merge:true}); }
+async function fbLoad(){ const s=await getDoc(docRef); return s.exists()?s.data():{}; }
+function fbListen(cb){ return onSnapshot(docRef, snap=>{ if(snap.exists()) cb(snap.data()); }); }
+
+// Expose to window so onclick= works
+Object.assign(window, {fbSave, fbLoad, fbListen});
+</script>
+
+<script>
 // ── Constants ─────────────────────────────────────────────────────
 const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
 const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳'};
@@ -241,22 +251,19 @@ async function saveToFirebase(){
   saving=true;
   setSyncDot('sync');
   try{
-    await docRef.set({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder},{merge:true});
+    await window.fbSave({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
     setSyncDot('ok');
   }catch(e){setSyncDot('');console.error('Save error:',e);}
   saving=false;
 }
 
 // Real-time listener
-docRef.onSnapshot(snap=>{
-  if(snap.exists){
-    const d=snap.data();
-    checks=d.checks||{};
-    freqOv=d.freq||{};
-    customTasks=d.custom||[];
-    deletedIds=d.deleted||[];
-    roomOrder=d.rooms||[...DEFAULT_ROOMS];
-  }
+window.fbListen(function(d){
+  checks=d.checks||{};
+  freqOv=d.freq||{};
+  customTasks=d.custom||[];
+  deletedIds=d.deleted||[];
+  roomOrder=d.rooms||[...DEFAULT_ROOMS];
   dbLoaded=true;
   setSyncDot('ok');
   renderAll();
@@ -304,7 +311,7 @@ function scheduleCleanup(){
       if(todayStr()>=unlock){delete checks[key];dirty=true;}
     });
     if(dirty){
-      docRef.set({checks:checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
+      window.fbSave({checks:checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
     }
   }, 800);
 }
