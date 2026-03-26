@@ -340,17 +340,20 @@ function addDays(dateStr,n){
   d.setDate(d.getDate()+n);
   return d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
 }
+function findCheckByTaskRoom(tid,room,slot){
+  // Cherche la coche active pour mensuel/bimens indépendamment du mois affiché
+  const suffix=slot?`|${tid}|${room}|${slot}`:`|${tid}|${room}`;
+  const key=Object.keys(checks).find(k=>k.endsWith(suffix)&&k.startsWith('month_'));
+  return key?checks[key]:null;
+}
 function nextMonthDate(wk,tid,room){
-  // Utilise la date de coche réelle si disponible, sinon la date de la semaine
-  const k=ck(wk,tid,room,null);
-  const c=checks[k];
+  const c=findCheckByTaskRoom(tid,room,null);
   const base=(c&&c.at)?new Date(c.at+'T12:00:00'):new Date(wk+'T12:00:00');
   base.setDate(base.getDate()+21);
   return base.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
 }
 function in14Days(wk,tid,room,slot){
-  const k=ck(wk,tid,room,slot);
-  const c=checks[k];
+  const c=findCheckByTaskRoom(tid,room,slot);
   const base=(c&&c.at)?new Date(c.at+'T12:00:00'):new Date(wk+'T12:00:00');
   base.setDate(base.getDate()+14);
   return base.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
@@ -382,19 +385,32 @@ function ck(wk,tid,room,slot){
   return `${wk}|${tid}|${room}`;
 }
 function isOn(wk,tid,room,slot){
-  const k=ck(wk,tid,room,slot);
-  const c=checks[k];
-  if(!c) return false;
-  // Support ancien format (true) et nouveau ({at:'...'})
-  if(c===true) return true;
-  if(!c.at) return true;
   const freq=getAllTasks().find(t=>t.id===tid)?.freq||'hebdo';
-  const days=freq==='mensuel'?21:freq==='bimens'?14:0;
-  if(days===0) return true; // hebdo: toujours visible
+  // Hebdo: clé par semaine, logique simple
+  if(freq==='hebdo'){
+    const k=`${wk}|${tid}|${room}`;
+    return!!checks[k];
+  }
+  // Mensuel/bimens: chercher la coche active dans checks (indépendant du mois affiché)
+  // La clé contient month_YYYY-MM — on cherche une coche encore valide
+  const days=freq==='mensuel'?21:14;
+  const prefix=freq==='bimens'
+    ?(slot?`month_`:`month_`) // on cherche toutes les clés
+    :'month_';
+  // Chercher dans toutes les clés correspondant à cette tâche/pièce/slot
+  const suffix=freq==='bimens'
+    ?(slot?`|${tid}|${room}|${slot}`:`|${tid}|${room}|A`)
+    :`|${tid}|${room}`;
+  const matchingKey=Object.keys(checks).find(k=>k.endsWith(suffix)&&k.startsWith('month_'));
+  if(!matchingKey) return false;
+  const c=checks[matchingKey];
+  if(!c) return false;
+  if(c===true) return true; // ancien format
+  if(!c.at) return true;
   const checkedAt=new Date(c.at+'T12:00:00');
   const unlockDate=new Date(checkedAt);
   unlockDate.setDate(checkedAt.getDate()+days);
-  return new Date()<unlockDate; // true = encore dans le délai (coché), false = délai dépassé
+  return new Date()<unlockDate;
 }
 
 async function toggle(wk,tid,room,slot){
