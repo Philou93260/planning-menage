@@ -156,14 +156,7 @@ footer{text-align:center;font-size:11px;color:#bbb;padding:1rem 0 2rem}
         <div class="li"><div class="ld" style="background:#b39ddb"></div>Mensuel</div>
       </div>
     </div>
-    <div class="filters">
-      <button class="fb on" id="fall" onclick="sf('all')">Toutes</button>
-      <button class="fb" id="ftodo" onclick="sf('todo')">À faire</button>
-      <button class="fb" id="fdone" onclick="sf('done')">Faites</button>
-      <button class="fb" id="fhebdo" onclick="sf('hebdo')">Hebdo</button>
-      <button class="fb" id="fbimens" onclick="sf('bimens')">Bi-mensuel</button>
-      <button class="fb" id="fmensuel" onclick="sf('mensuel')">Mensuel</button>
-    </div>
+    <div class="filters" id="room-filters"></div>
     <div id="rooms"></div>
   </div>
 
@@ -235,8 +228,8 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 
 // ── Constants ──────────────────────────────────────────────────────
-const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
-const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳'};
+const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine','Entrée'];
+const ICONS={SdB:'🚿',WC:'🚽',Douche:'🛁',Jules:'🛏',Desk:'💻',Couloir:'🚪',Chambre:'🛌',Salon:'🛋',Cuisine:'🍳',Entrée:'🚪'};
 const FREQS=['hebdo','bimens','mensuel'];
 const FLABELS={hebdo:'Hebdo',bimens:'Bi-mensuel',mensuel:'Mensuel'};
 const FCLASS={hebdo:'fhebdo',bimens:'fbimens',mensuel:'fmensuel'};
@@ -260,6 +253,9 @@ const DEFAULT_TASKS=[
   {id:'derlit',  name:'Derrière le lit',  rooms:['Jules','Chambre'],freq:'mensuel'},
   {id:'four',    name:'Four',             rooms:['Cuisine'],freq:'mensuel'},
   {id:'verr',    name:'Verrière',         rooms:['Salon'],freq:'mensuel'},
+  {id:'entree_porte',  name:'Portes',    rooms:['Entrée'],freq:'hebdo'},
+  {id:'entree_miroir', name:'Miroirs',   rooms:['Entrée'],freq:'hebdo'},
+  {id:'entree_chaussures', name:'Chaussures', rooms:['Entrée'],freq:'hebdo'},
 ];
 
 // ── State ──────────────────────────────────────────────────────────
@@ -375,11 +371,17 @@ function cw(d,reset){offset=reset?0:offset+d;closeMenu();renderPlanning();}
 function cm(d){monthOffset+=d;renderBilan();}
 function sf(f){
   filter=f;
-  ['all','todo','done','hebdo','bimens','mensuel'].forEach(id=>{
-    const el=document.getElementById('f'+id);
-    if(el)el.classList.toggle('on',id===f);
-  });
+  document.querySelectorAll('#room-filters .fb').forEach(b=>b.classList.toggle('on',b.dataset.filter===f));
   closeMenu();renderPlanning();
+}
+
+function renderFilters(){
+  let h=`<button class="fb${filter==='all'?' on':''}" data-filter="all" onclick="sf('all')">Toutes</button>
+    <button class="fb${filter==='todo'?' on':''}" data-filter="todo" onclick="sf('todo')">À faire</button>`;
+  getAllRooms().forEach(r=>{
+    h+=`<button class="fb${filter===r?' on':''}" data-filter="${r}" onclick="sf('${r}')">${r}</button>`;
+  });
+  document.getElementById('room-filters').innerHTML=h;
 }
 function showScreen(s){
   currentScreen=s;
@@ -504,6 +506,7 @@ function renderPlanning(){
   const lbl=wkLabel(offset);
   document.getElementById('wl').textContent=lbl;
   document.getElementById('topweek').textContent=lbl;
+  renderFilters();
 
   let tot=0,done=0;
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
@@ -516,16 +519,10 @@ function renderPlanning(){
   document.getElementById('pt').textContent=`${done} / ${tot} tâches · ${pct}%`;
 
   let html='';
-  getAllRooms().forEach(room=>{
+  const roomsToShow = (filter==='all'||filter==='todo') ? getAllRooms() : getAllRooms().filter(r=>r===filter);
+  roomsToShow.forEach(room=>{
     let tasks=getTasksForRoom(room);
     let filtered=tasks.filter(t=>{
-      if(filter==='hebdo')return t.freq==='hebdo';
-      if(filter==='bimens')return t.freq==='bimens';
-      if(filter==='mensuel')return t.freq==='mensuel';
-      if(filter==='done'){
-        if(t.freq==='bimens')return['A','B'].some(s=>isOn(wk,t.id,room,s));
-        return isOn(wk,t.id,room);
-      }
       if(filter==='todo'){
         if(t.freq==='bimens')return['A','B'].some(s=>!isOn(wk,t.id,room,s));
         return!isOn(wk,t.id,room);
