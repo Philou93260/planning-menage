@@ -15,7 +15,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .topbar{background:#2d6a4f;color:white;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
 .topbar-icon{font-size:22px}.topbar-title{font-size:17px;font-weight:700;flex:1}.topbar-sub{font-size:11px;opacity:.8}
 .sync-dot{width:10px;height:10px;border-radius:50%;background:#aaa;flex-shrink:0}
-.sync-dot.ok{background:#4ade80}.sync-dot.sync{background:#facc15;animation:pulse .8s infinite}
+.sync-dot.ok{background:#4ade80}.sync-dot.sync{background:#facc15;animation:pulse .8s infinite}.sync-dot.err{background:#f87171}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .tabbar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e0e0e0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 6px;cursor:pointer;font-size:10px;color:#999;font-weight:500;gap:3px;border:none;background:transparent}
@@ -45,7 +45,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .task-row.locked-row{background:#fafafa}
 .chk{width:26px;height:26px;border-radius:7px;border:2px solid #bbb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:700;color:white;transition:all .15s}
 .chk.on{background:#2d6a4f;border-color:#2d6a4f}.chk.locked{background:#e0e0e0;border-color:#ccc;cursor:default}
-.task-name{flex:1;font-size:14px}.task-name.struck{text-decoration:line-through;color:#bbb}.task-name.locked-name{color:#aaa}
+.task-name{flex:1;font-size:14px}.task-name.struck{text-decoration:line-through;color:#bbb}.task-name.lkn{color:#aaa}
 .locked-info{display:flex;align-items:center;gap:8px;padding:2px 14px 10px 50px}
 .locked-date{font-size:11px;color:#aaa;flex:1}
 .redo-btn{background:#edf7f1;border:1.5px solid #2d6a4f;border-radius:10px;cursor:pointer;font-size:15px;padding:5px 10px;color:#2d6a4f;font-weight:700;min-width:40px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -103,12 +103,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .cal-dot{width:5px;height:5px;border-radius:50%;margin:1px auto}
 .empty-state{text-align:center;padding:2rem;color:#aaa;font-size:14px}
 .loading{text-align:center;padding:2rem;color:#888;font-size:14px}
+.refresh-btn{background:#edf7f1;border:1px solid #2d6a4f;color:#2d6a4f;border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
 <div class="topbar">
   <span class="topbar-icon">🧹</span>
   <div style="flex:1"><div class="topbar-title">Planning Ménage</div><div class="topbar-sub" id="topweek"></div></div>
+  <button class="refresh-btn" onclick="APP.refresh()" style="margin-right:8px">↺ Sync</button>
   <div class="sync-dot" id="syncdot"></div>
 </div>
 <div class="app">
@@ -170,9 +172,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ── Firebase setup ────────────────────────────────────────────────
+// ── Firebase — getDoc/setDoc only, NO onSnapshot (breaks Safari) ──
 const fbApp = initializeApp({
   apiKey:"AIzaSyDvQoS-_I0LSDYkW_dVIt8Hqmfqj-_SvGU",
   authDomain:"planning-menage-c832d.firebaseapp.com",
@@ -182,7 +184,7 @@ const fbApp = initializeApp({
   appId:"1:1089776086126:web:7318486e939eea4dbf8a7f"
 });
 const db = getFirestore(fbApp);
-const docRef = doc(db, 'planning', 'shared');
+const docRef = doc(db,'planning','shared');
 
 // ── Constants ─────────────────────────────────────────────────────
 const DEFAULT_ROOMS=['SdB','WC','Douche','Jules','Desk','Couloir','Chambre','Salon','Cuisine'];
@@ -213,97 +215,118 @@ const DEFAULT_TASKS=[
 ];
 
 // ── State ─────────────────────────────────────────────────────────
-let offset=0, roomFilter='all', openMenu=null;
-let monthOffset=0, bilanView='recap', currentScreen='planning';
-let checks={}, freqOv={}, customTasks=[], deletedIds=[], roomOrder=[...DEFAULT_ROOMS];
-let dbLoaded=false, isSaving=false;
+let offset=0,roomFilter='all',openMenu=null;
+let monthOffset=0,bilanView='recap',currentScreen='planning';
+let checks={},freqOv={},customTasks=[],deletedIds=[],roomOrder=[...DEFAULT_ROOMS];
+let dbLoaded=false;
 
-// ── Firebase ──────────────────────────────────────────────────────
-function setSyncDot(s){
-  const d=document.getElementById('syncdot');
-  d.className='sync-dot'+(s==='ok'?' ok':s==='sync'?' sync':'');
-}
+// ── Firebase: simple get/set (no realtime) ────────────────────────
+function dot(s){const d=document.getElementById('syncdot');d.className='sync-dot'+(s==='ok'?' ok':s==='sync'?' sync':s==='err'?' err':'');}
 
-async function save(){
-  if(isSaving) return;
-  isSaving=true;
-  setSyncDot('sync');
+async function fbLoad(){
+  dot('sync');
   try{
-    await setDoc(docRef,{checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder},{merge:true});
-    setSyncDot('ok');
-  }catch(e){
-    setSyncDot('');
-    console.error('Firebase save error:',e);
-  }
-  isSaving=false;
-}
-
-onSnapshot(docRef, snap=>{
-  if(snap.exists()){
-    const d=snap.data();
-    // Only update state if we're not currently saving (avoid overwrite loop)
-    if(!isSaving){
-      checks=d.checks||{};
+    const snap=await getDoc(docRef);
+    if(snap.exists()){
+      const d=snap.data();
+      // Clean expired checks before applying
+      const now=todayStr();
+      const raw=d.checks||{};
+      Object.keys(raw).forEach(k=>{
+        const c=raw[k];if(!c||!c.done)return;
+        const freq=k.startsWith('b|')?'bimens':k.startsWith('m|')?'mensuel':'hebdo';
+        const unlock=addDays(c.at,LOCKDAYS[freq]);
+        if(now>=unlock) delete raw[k];
+      });
+      checks=raw;
       freqOv=d.freq||{};
       customTasks=d.custom||[];
       deletedIds=d.deleted||[];
       roomOrder=d.rooms||[...DEFAULT_ROOMS];
     }
+    dbLoaded=true;
+    dot('ok');
+    renderAll();
+  }catch(e){
+    dot('err');
+    console.error('Load error:',e);
   }
-  dbLoaded=true;
-  setSyncDot('ok');
-  renderAll();
-});
+}
 
-// ── Keys ─────────────────────────────────────────────────────────
-// hebdo:   "h|YYYY-MM-DD|tid|room"  (resets each week)
-// bimens:  "b|tid|room|A" or "b|tid|room|B"  (global, date-locked)
-// mensuel: "m|tid|room"  (global, date-locked)
-const ckH=(wk,tid,room)=>`h|${wk}|${tid}|${room}`;
-const ckB=(tid,room,slot)=>`b|${tid}|${room}|${slot}`;
-const ckM=(tid,room)=>`m|${tid}|${room}`;
+async function fbSave(){
+  dot('sync');
+  try{
+    await setDoc(docRef,{checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
+    dot('ok');
+    renderAll();
+  }catch(e){
+    dot('err');
+    console.error('Save error:',e);
+  }
+}
+
+async function refresh(){
+  await fbLoad();
+}
+
+// Auto-refresh every 30s for cross-device sync
+setInterval(fbLoad, 30000);
+
+// ── Keys ──────────────────────────────────────────────────────────
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);};
+const fmtDate=s=>new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+const ckH=(wk,tid,r)=>`h|${wk}|${tid}|${r}`;
+const ckB=(tid,r,s)=>`b|${tid}|${r}|${s}`;
+const ckM=(tid,r)=>`m|${tid}|${r}`;
+
+function wkKey(o){const n=new Date(),dw=n.getDay()||7,m=new Date(n);m.setDate(n.getDate()-dw+1+o*7);return m.toISOString().slice(0,10);}
+function wkLabel(o){
+  const k=wkKey(o),m=new Date(k),s=new Date(m);s.setDate(m.getDate()+6);
+  const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  if(o===0)return`Cette semaine · ${f(m)} – ${f(s)}`;
+  if(o===-1)return`Sem. dernière · ${f(m)} – ${f(s)}`;
+  return`${f(m)} – ${f(s)}`;
+}
 
 function keyFor(tid,room,freq,slot){
-  if(freq==='hebdo')  return ckH(wkKey(offset),tid,room);
+  if(freq==='hebdo') return ckH(wkKey(offset),tid,room);
   if(freq==='bimens') return ckB(tid,room,slot);
   return ckM(tid,room);
 }
 
-// ── Lock ──────────────────────────────────────────────────────────
-function todayStr(){return new Date().toISOString().slice(0,10);}
-function addDays(s,n){const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
-function fmtDate(s){return new Date(s+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});}
-
+// ── Lock — simple, no side effects ───────────────────────────────
 function getLock(key,freq){
   const c=checks[key];
   if(!c||!c.done) return {done:false,locked:false};
   const unlock=addDays(c.at,LOCKDAYS[freq]);
-  // Still within lockout period
   if(todayStr()<unlock) return {done:true,locked:true,unlockDate:unlock};
-  // Expired: return as unchecked — cleanup will remove it from Firebase
-  return {done:false,locked:false,wasExpired:true,key};
+  return {done:false,locked:false}; // expired: treat as unchecked
 }
+
+// ── Task helpers ──────────────────────────────────────────────────
+function getAllTasks(){
+  return[...DEFAULT_TASKS.filter(t=>!deletedIds.includes(t.id)).map(t=>({...t,freq:freqOv[t.id]||t.freq})),
+         ...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))];
+}
+function getAllRooms(){return[...roomOrder,...new Set(customTasks.flatMap(t=>t.rooms).filter(r=>!roomOrder.includes(r)))];}
+function getTasksForRoom(room){return getAllTasks().filter(t=>t.rooms.includes(room)&&!deletedIds.includes('del_room_'+t.id+'_'+room));}
 
 // ── Actions ───────────────────────────────────────────────────────
 function doCheck(tid,room,freq,slot){
-  const key=keyFor(tid,room,freq,slot||null);
+  const key=keyFor(tid,room,freq,slot);
   if(checks[key]&&checks[key].done) delete checks[key];
   else checks[key]={done:true,at:todayStr()};
-  save();
+  fbSave();
 }
 
 function doRedo(tid,room,freq,slot){
-  const key=keyFor(tid,room,freq,slot||null);
+  const key=keyFor(tid,room,freq,slot);
   checks[key]={done:true,at:todayStr()};
-  console.log('doRedo called, key=',key,'new value=',checks[key]);
-  save();
+  fbSave();
 }
 
-function setFreq(tid,freq){
-  freqOv[tid]=freq;
-  save();
-  closeMenu();
-}
+function setFreq(tid,freq){freqOv[tid]=freq;closeMenu();fbSave();}
 
 function addTask(){
   const name=document.getElementById('new-task-name').value.trim();
@@ -314,28 +337,25 @@ function addTask(){
   if(ex){if(!ex.rooms.includes(room))ex.rooms.push(room);}
   else customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});
   document.getElementById('new-task-name').value='';
-  save();renderManage();renderPlanning();
+  fbSave();
 }
 
 function deleteTaskFromRoom(tid,room){
   const def=DEFAULT_TASKS.find(t=>t.id===tid);
-  if(def){
-    if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}
-    else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}
-  }
+  if(def){if(def.rooms.length===1){if(!deletedIds.includes(tid))deletedIds.push(tid);}
+  else{const k='del_room_'+tid+'_'+room;if(!deletedIds.includes(k))deletedIds.push(k);}}
   const ci=customTasks.findIndex(t=>t.id===tid);
   if(ci>=0){customTasks[ci].rooms=customTasks[ci].rooms.filter(r=>r!==room);if(!customTasks[ci].rooms.length)customTasks.splice(ci,1);}
-  save();renderManage();renderPlanning();
+  fbSave();
 }
 
 function quickAdd(room){
-  const inp=document.getElementById('it-'+room);
-  const name=inp.value.trim();if(!name)return;
+  const inp=document.getElementById('it-'+room);const name=inp.value.trim();if(!name)return;
   const freq=document.getElementById('new-task-freq').value||'hebdo';
   const ex=customTasks.find(t=>t.name.toLowerCase()===name.toLowerCase());
   if(ex){if(!ex.rooms.includes(room))ex.rooms.push(room);}
   else customTasks.push({id:'ct_'+Date.now(),name,rooms:[room],freq});
-  inp.value='';save();renderManage();renderPlanning();
+  inp.value='';fbSave();
 }
 
 function markWeekDone(wk){
@@ -345,7 +365,7 @@ function markWeekDone(wk){
     else if(task.freq==='mensuel'){const k=ckM(task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
     else{const k=ckH(wk,task.id,room);if(!checks[k]||!checks[k].done)checks[k]={done:true,at:t};}
   }));
-  save();
+  fbSave();
 }
 
 function resetWeek(wk){
@@ -354,25 +374,10 @@ function resetWeek(wk){
     else if(task.freq==='mensuel'){delete checks[ckM(task.id,room)];}
     else{delete checks[ckH(wk,task.id,room)];}
   }));
-  save();
+  fbSave();
 }
 
-// Cleanup expired checks from Firebase (called after render detects expired ones)
-let expiredKeys=[];
-let cleanupTimer=null;
-function scheduleCleanup(key){
-  expiredKeys.push(key);
-  if(cleanupTimer) clearTimeout(cleanupTimer);
-  cleanupTimer=setTimeout(()=>{
-    cleanupTimer=null;
-    let dirty=false;
-    expiredKeys.forEach(k=>{if(checks[k]){delete checks[k];dirty=true;}});
-    expiredKeys=[];
-    if(dirty) save();
-  },1000);
-}
-
-// ── Nav ───────────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────
 function cw(d,reset){offset=reset?0:offset+d;closeMenu();renderPlanning();}
 function cm(d){monthOffset+=d;renderBilan();}
 function setRoomFilter(r){
@@ -386,9 +391,7 @@ function showScreen(s){
     document.getElementById('screen-'+id).classList.toggle('on',id===s);
     document.getElementById('tab-'+id).classList.toggle('on',id===s);
   });
-  if(s==='manage')renderManage();
-  else if(s==='bilan')renderBilan();
-  else renderPlanning();
+  if(s==='manage')renderManage();else if(s==='bilan')renderBilan();else renderPlanning();
 }
 function setView(v){
   bilanView=v;
@@ -407,55 +410,32 @@ function toggleFreqMenu(tid,room,el){
 }
 function tog(id){const el=document.getElementById(id);if(el)el.classList.toggle('hide');}
 
-// ── Task helpers ──────────────────────────────────────────────────
-function wkKey(o){const n=new Date(),dw=n.getDay()||7,m=new Date(n);m.setDate(n.getDate()-dw+1+o*7);return m.toISOString().slice(0,10);}
-function wkLabel(o){
-  const k=wkKey(o),m=new Date(k),s=new Date(m);s.setDate(m.getDate()+6);
-  const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-  if(o===0)return`Cette semaine · ${f(m)} – ${f(s)}`;
-  if(o===-1)return`Sem. dernière · ${f(m)} – ${f(s)}`;
-  return`${f(m)} – ${f(s)}`;
-}
-function getAllTasks(){
-  return[...DEFAULT_TASKS.filter(t=>!deletedIds.includes(t.id)).map(t=>({...t,freq:freqOv[t.id]||t.freq})),
-         ...customTasks.map(t=>({...t,freq:freqOv[t.id]||t.freq}))];
-}
-function getAllRooms(){return[...roomOrder,...new Set(customTasks.flatMap(t=>t.rooms).filter(r=>!roomOrder.includes(r)))];}
-function getTasksForRoom(room){return getAllTasks().filter(t=>t.rooms.includes(room)&&!deletedIds.includes('del_room_'+t.id+'_'+room));}
-
 // ── Render helpers ────────────────────────────────────────────────
 function fmenu(tid,room,freq){
-  return `<div style="position:relative;display:inline-flex">
+  return`<div style="position:relative;display:inline-flex">
     <span class="ftag ${FCLASS[freq]}" onclick="APP.toggleFreqMenu('${tid}','${room}',this)">${FLABELS[freq]} ▾</span>
     <div class="freq-menu hide" id="fm-${tid}-${room}">
       ${FREQS.map(f=>`<div class="freq-opt${freq===f?' sel':''}" onclick="APP.setFreq('${tid}','${f}')">${FLABELS[f]}</div>`).join('')}
     </div>
   </div>`;
 }
-
 function renderFilters(){
-  let html=`<button class="fb${roomFilter==='all'?' on':''}" data-room="all" onclick="APP.setRoomFilter('all')">Toutes</button>
+  let h=`<button class="fb${roomFilter==='all'?' on':''}" data-room="all" onclick="APP.setRoomFilter('all')">Toutes</button>
     <button class="fb${roomFilter==='todo'?' on':''}" data-room="todo" onclick="APP.setRoomFilter('todo')">À faire</button>`;
-  getAllRooms().forEach(r=>{html+=`<button class="fb${roomFilter===r?' on':''}" data-room="${r}" onclick="APP.setRoomFilter('${r}')">${r}</button>`;});
-  document.getElementById('room-filters').innerHTML=html;
+  getAllRooms().forEach(r=>{h+=`<button class="fb${roomFilter===r?' on':''}" data-room="${r}" onclick="APP.setRoomFilter('${r}')">${r}</button>`;});
+  document.getElementById('room-filters').innerHTML=h;
 }
 
-// ── RENDER PLANNING ───────────────────────────────────────────────
+// ── Render Planning ───────────────────────────────────────────────
 function renderPlanning(){
   if(!dbLoaded){document.getElementById('rooms').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
-  const lbl=wkLabel(offset);
-  document.getElementById('wl').textContent=lbl;
-  document.getElementById('topweek').textContent=lbl;
+  document.getElementById('wl').textContent=wkLabel(offset);
+  document.getElementById('topweek').textContent=wkLabel(offset);
   renderFilters();
-
   let tot=0,done=0;
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
-    if(t.freq==='bimens'){
-      ['A','B'].forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);if(!li.locked){tot++;if(li.done)done++;}});
-    }else{
-      const li=getLock(keyFor(t.id,room,t.freq,null),t.freq);
-      if(!li.locked){tot++;if(li.done)done++;}
-    }
+    const slots=t.freq==='bimens'?['A','B']:[null];
+    slots.forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);if(!li.locked){tot++;if(li.done)done++;}});
   }));
   const pct=tot?Math.round(done/tot*100):0;
   document.getElementById('pf').style.width=pct+'%';
@@ -469,15 +449,15 @@ function renderPlanning(){
     let tasks=getTasksForRoom(room);
     if(roomFilter==='todo'){
       tasks=tasks.filter(t=>{
-        if(t.freq==='bimens') return ['A','B'].some(s=>!getLock(keyFor(t.id,room,t.freq,s),t.freq).done);
-        return !getLock(keyFor(t.id,room,t.freq,null),t.freq).done;
+        const slots=t.freq==='bimens'?['A','B']:[null];
+        return slots.some(s=>!getLock(keyFor(t.id,room,t.freq,s),t.freq).done);
       });
     }
     if(!tasks.length)return;
     let rd=0,rt=0;
     getTasksForRoom(room).forEach(t=>{
-      if(t.freq==='bimens'){['A','B'].forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);rt++;if(li.done&&li.locked)rd++;});}
-      else{const li=getLock(keyFor(t.id,room,t.freq,null),t.freq);rt++;if(li.done&&li.locked)rd++;}
+      const slots=t.freq==='bimens'?['A','B']:[null];
+      slots.forEach(s=>{const li=getLock(keyFor(t.id,room,t.freq,s),t.freq);rt++;if(li.done&&li.locked)rd++;});
     });
     const full=rt>0&&rd===rt;
     html+=`<div class="room-block">
@@ -492,13 +472,12 @@ function renderPlanning(){
       if(freq==='hebdo'){
         const key=keyFor(t.id,room,freq,null);
         const li=getLock(key,freq);
-        if(li.wasExpired) scheduleCleanup(li.key);
         const on=li.done&&li.locked;
         html+=`<div class="task-row${li.locked?' locked-row':''}">
           <div class="chk${on?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="APP.doCheck('${t.id}','${room}','${freq}',null)"`:''}>
             ${on?'✓':''}
           </div>
-          <span class="task-name${on?' struck':''}${li.locked?' locked-name':''}">${t.name}</span>
+          <span class="task-name${on?' struck':''}${li.locked?' lkn':''}">${t.name}</span>
           ${li.locked?`<button class="redo-btn" onclick="event.stopPropagation();APP.doRedo('${t.id}','${room}','${freq}',null)">🔄</button>`:''}
           ${fmenu(t.id,room,freq)}
         </div>`;
@@ -507,9 +486,7 @@ function renderPlanning(){
       }else if(freq==='bimens'){
         html+=`<div class="task-row"><div style="width:26px;flex-shrink:0"></div><span class="task-name">${t.name}</span>${fmenu(t.id,room,freq)}</div>`;
         ['A','B'].forEach((slot,i)=>{
-          const key=keyFor(t.id,room,freq,slot);
-          const li=getLock(key,freq);
-          if(li.wasExpired) scheduleCleanup(li.key);
+          const li=getLock(keyFor(t.id,room,freq,slot),freq);
           const on=li.done&&li.locked;
           html+=`<div class="bi-target">
             <div class="bi-chk${on?' on':''}${li.locked?' locked':''}" ${!li.locked?`onclick="APP.doCheck('${t.id}','${room}','${freq}','${slot}')"`:''}>
@@ -524,11 +501,10 @@ function renderPlanning(){
       }else{
         const key=keyFor(t.id,room,freq,null);
         const li=getLock(key,freq);
-        if(li.wasExpired) scheduleCleanup(li.key);
         const on=li.done&&li.locked;
         html+=`<div class="task-row${li.locked?' locked-row':''}">
           <div style="width:26px;flex-shrink:0"></div>
-          <span class="task-name${li.locked?' locked-name':''}">${t.name}</span>
+          <span class="task-name${li.locked?' lkn':''}">${t.name}</span>
           ${li.locked?`<button class="redo-btn" onclick="event.stopPropagation();APP.doRedo('${t.id}','${room}','${freq}',null)">🔄</button>`:''}
           ${fmenu(t.id,room,freq)}
         </div>
@@ -547,7 +523,7 @@ function renderPlanning(){
   document.getElementById('rooms').innerHTML=html||'<div class="empty-state">Aucune tâche.</div>';
 }
 
-// ── RENDER MANAGE ─────────────────────────────────────────────────
+// ── Render Manage ─────────────────────────────────────────────────
 function renderManage(){
   const sel=document.getElementById('new-task-room');
   sel.innerHTML='<option value="">Pièce...</option>';
@@ -556,11 +532,10 @@ function renderManage(){
   let html='';
   getAllRooms().forEach(room=>{
     const tasks=getTasksForRoom(room);if(!tasks.length)return;
-    html+=`<div class="manage-room">
-      <div class="manage-room-hdr" onclick="APP.tog('mr-${room}')">
-        <span>${ICONS[room]||'🏠'}</span><span class="room-name">${room}</span>
-        <span style="font-size:12px;color:#888">${tasks.length} tâche${tasks.length>1?'s':''}</span>
-      </div><div id="mr-${room}">`;
+    html+=`<div class="manage-room"><div class="manage-room-hdr" onclick="APP.tog('mr-${room}')">
+      <span>${ICONS[room]||'🏠'}</span><span class="room-name">${room}</span>
+      <span style="font-size:12px;color:#888">${tasks.length} tâche${tasks.length>1?'s':''}</span>
+    </div><div id="mr-${room}">`;
     tasks.forEach(t=>html+=`<div class="manage-task-row">
       <span class="manage-task-name">${t.name}</span>
       <span class="ftag ${FCLASS[t.freq]}" style="cursor:default">${FLABELS[t.freq]}</span>
@@ -574,10 +549,10 @@ function renderManage(){
   document.getElementById('manage-rooms').innerHTML=html||'<div class="empty-state">Aucune pièce.</div>';
 }
 
-// ── RENDER BILAN ──────────────────────────────────────────────────
+// ── Render Bilan ──────────────────────────────────────────────────
 function getMonthWeeks(mo){
-  const now=new Date(),target=new Date(now.getFullYear(),now.getMonth()+mo,1);
-  const ty=target.getFullYear(),tm=target.getMonth();
+  const now=new Date(),tgt=new Date(now.getFullYear(),now.getMonth()+mo,1);
+  const ty=tgt.getFullYear(),tm=tgt.getMonth();
   const first=new Date(ty,tm,1),last=new Date(ty,tm+1,0);
   let mon=new Date(first);const dw=mon.getDay()||7;mon.setDate(mon.getDate()-dw+1);
   const weeks=[];
@@ -591,16 +566,21 @@ function getMonthWeeks(mo){
 }
 function renderBilan(){
   if(!dbLoaded){document.getElementById('bilan-content').innerHTML='<div class="loading">⏳ Chargement…</div>';return;}
-  const target=new Date(new Date().getFullYear(),new Date().getMonth()+monthOffset,1);
-  document.getElementById('mlabel').textContent=`${MONTHS_FR[target.getMonth()]} ${target.getFullYear()}`;
+  const tgt=new Date(new Date().getFullYear(),new Date().getMonth()+monthOffset,1);
+  document.getElementById('mlabel').textContent=`${MONTHS_FR[tgt.getMonth()]} ${tgt.getFullYear()}`;
   const{weeks,ty,tm}=getMonthWeeks(monthOffset);
   if(bilanView==='recap')renderRecap(weeks);
   else if(bilanView==='missed')renderMissed(weeks);
   else renderCal(weeks,ty,tm);
 }
-const isDoneB=(tid,room)=>['A','B'].every(s=>{const c=checks[ckB(tid,room,s)];return c&&c.done;});
-const isDoneM=(tid,room)=>{const c=checks[ckM(tid,room)];return!!(c&&c.done);};
-const isDoneH=(wk,tid,room)=>{const c=checks[ckH(wk,tid,room)];return!!(c&&c.done);};
+const chkB=(tid,r)=>['A','B'].every(s=>{const c=checks[ckB(tid,r,s)];return c&&c.done;});
+const chkM=(tid,r)=>{const c=checks[ckM(tid,r)];return!!(c&&c.done);};
+const chkH=(wk,tid,r)=>{const c=checks[ckH(wk,tid,r)];return!!(c&&c.done);};
+function isDone(wk,t,room){
+  if(t.freq==='bimens') return chkB(t.id,room);
+  if(t.freq==='mensuel') return chkM(t.id,room);
+  return chkH(wk,t.id,room);
+}
 function renderRecap(weeks){
   const nowD=new Date();let html='';
   [...weeks].reverse().forEach(w=>{
@@ -610,21 +590,16 @@ function renderRecap(weeks){
         ['A','B'].forEach(s=>{wTot++;const c=checks[ckB(t.id,room,s)];if(c&&c.done)wDone++;});
         rows.push({name:`${t.name} · ${room} (1ère)`,done:!!(checks[ckB(t.id,room,'A')]?.done)});
         rows.push({name:`${t.name} · ${room} (2e)`,done:!!(checks[ckB(t.id,room,'B')]?.done)});
-      }else if(t.freq==='mensuel'){
-        wTot++;const d=isDoneM(t.id,room);if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
-      }else{
-        wTot++;const d=isDoneH(w.key,t.id,room);if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});
-      }
+      }else{wTot++;const d=isDone(w.key,t,room);if(d)wDone++;rows.push({name:`${t.name} · ${room}`,done:d});}
     }));
     const pct=wTot?Math.round(wDone/wTot*100):0;
     const col=pct>=80?'#2d6a4f':pct>=40?'#e6a817':'#cc3333';
     html+=`<div class="recap-week"><div class="recap-week-hdr" onclick="APP.tog('rw-${w.key}')">
       <span class="recap-week-lbl">${w.label}</span>
-      ${!isFuture
-        ?`<span class="recap-pct" style="background:${col}22;color:${col}">${pct}%</span>
-          <button class="recap-reset" onclick="event.stopPropagation();APP.markWeekDone('${w.key}')">✅ Tout fait</button>
-          <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();APP.resetWeek('${w.key}')">↺</button>`
-        :'<span style="font-size:12px;color:#aaa">À venir</span>'}
+      ${!isFuture?`<span class="recap-pct" style="background:${col}22;color:${col}">${pct}%</span>
+        <button class="recap-reset" onclick="event.stopPropagation();APP.markWeekDone('${w.key}')">✅ Tout fait</button>
+        <button class="recap-reset" style="color:#cc3333;border-color:#cc3333" onclick="event.stopPropagation();APP.resetWeek('${w.key}')">↺</button>`
+      :'<span style="font-size:12px;color:#aaa">À venir</span>'}
     </div>`;
     if(!isFuture){
       html+=`<div id="rw-${w.key}" class="hide">`;
@@ -640,8 +615,7 @@ function renderMissed(weeks){
   getAllRooms().forEach(room=>getTasksForRoom(room).forEach(t=>{
     weeks.forEach(w=>{
       if(w.sun>=nowD)return;
-      const done=t.freq==='bimens'?isDoneB(t.id,room):t.freq==='mensuel'?isDoneM(t.id,room):isDoneH(w.key,t.id,room);
-      if(!done){if(!mb[room])mb[room]=[];mb[room].push({task:t.name,week:w.label});}
+      if(!isDone(w.key,t,room)){if(!mb[room])mb[room]=[];mb[room].push({task:t.name,week:w.label});}
     });
   }));
   let html='';
@@ -659,8 +633,7 @@ function renderCal(weeks,ty,tm){
     weeks.forEach(w=>{
       if(!ds[w.key])ds[w.key]={done:0,tot:0};
       if(t.freq==='bimens'){ds[w.key].tot+=2;ds[w.key].done+=['A','B'].filter(s=>{const c=checks[ckB(t.id,room,s)];return c&&c.done;}).length;}
-      else if(t.freq==='mensuel'){ds[w.key].tot++;if(isDoneM(t.id,room))ds[w.key].done++;}
-      else{ds[w.key].tot++;if(isDoneH(w.key,t.id,room))ds[w.key].done++;}
+      else{ds[w.key].tot++;if(isDone(w.key,t,room))ds[w.key].done++;}
     });
   }));
   const first=new Date(ty,tm,1),dim=new Date(ty,tm+1,0).getDate(),sdow=(first.getDay()||7)-1;
@@ -672,8 +645,7 @@ function renderCal(weeks,ty,tm){
     const wk=mon.toISOString().slice(0,10),s=ds[wk]||{done:0,tot:0},isFuture=date>nowD;
     const pct=s.tot?s.done/s.tot:0;
     const cls=isFuture||s.tot===0?'future':pct>=1?'ok':pct>0?'partial':'miss';
-    const dotCol=pct>=1?'#2d6a4f':pct>0?'#e6a817':'#cc3333';
-    html+=`<div class="cal-day ${cls}"><div class="day-num">${day}</div>${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${dotCol}"></div>`:''}</div>`;
+    html+=`<div class="cal-day ${cls}"><div class="day-num">${day}</div>${!isFuture&&s.tot>0?`<div class="cal-dot" style="background:${pct>=1?'#2d6a4f':pct>0?'#e6a817':'#cc3333'}"></div>`:''}</div>`;
   }
   html+=`</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
     <div class="li"><div class="ld" style="background:#2d6a4f"></div><span style="font-size:11px">Toutes faites</span></div>
@@ -688,13 +660,12 @@ function renderAll(){
   else renderManage();
 }
 
-// ── New room ──────────────────────────────────────────────────────
 document.addEventListener('change',e=>{
   if(e.target.id==='new-task-room'&&e.target.value==='__new'){
     const name=prompt('Nom de la nouvelle pièce :');
     if(name&&name.trim()){
       const r=name.trim();if(!roomOrder.includes(r))roomOrder.push(r);
-      save();renderManage();
+      fbSave();renderManage();
       e.target.innerHTML='<option value="">Pièce...</option>';
       getAllRooms().forEach(rr=>e.target.innerHTML+=`<option value="${rr}">${rr}</option>`);
       e.target.innerHTML+='<option value="__new">+ Nouvelle pièce...</option>';
@@ -704,16 +675,17 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('click',e=>{if(openMenu&&!e.target.classList.contains('ftag'))closeMenu();});
 
-// ── Expose ALL functions via APP namespace ────────────────────────
-// Using a namespace object avoids all module/window timing issues
+// ── Expose via APP namespace ──────────────────────────────────────
 window.APP={
   cw,cm,setRoomFilter,showScreen,setView,
   toggleFreqMenu,setFreq,tog,
   doCheck,doRedo,
   addTask,deleteTaskFromRoom,quickAdd,
-  markWeekDone,resetWeek
+  markWeekDone,resetWeek,refresh
 };
 
+// ── Load on start ─────────────────────────────────────────────────
+fbLoad();
 </script>
 </body>
 </html>
