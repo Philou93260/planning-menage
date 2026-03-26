@@ -77,6 +77,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .mens-label{font-size:12px;color:#555;font-weight:500}
 .mens-done{color:#aaa!important;text-decoration:line-through}
 .bi-done{color:#aaa!important;text-decoration:line-through}
+.redo-btn{background:#edf7f1;border:1.5px solid #2d6a4f;border-radius:10px;cursor:pointer;font-size:14px;padding:3px 9px;color:#2d6a4f;font-weight:700;flex-shrink:0}
 /* manage */
 .manage-room{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
 .manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
@@ -255,8 +256,8 @@ const DEFAULT_TASKS=[
   {id:'derlit',  name:'Derrière le lit',  rooms:['Jules','Chambre'],freq:'mensuel'},
   {id:'four',    name:'Four',             rooms:['Cuisine'],freq:'mensuel'},
   {id:'verr',    name:'Verrière',         rooms:['Salon'],freq:'mensuel'},
-  {id:'entree_porte',  name:'Portes',    rooms:['Entrée'],freq:'hebdo'},
-  {id:'entree_miroir', name:'Miroirs',   rooms:['Entrée'],freq:'hebdo'},
+  {id:'entree_porte',      name:'Portes',     rooms:['Entrée'],freq:'hebdo'},
+  {id:'entree_miroir',     name:'Miroirs',    rooms:['Entrée'],freq:'hebdo'},
   {id:'entree_chaussures', name:'Chaussures', rooms:['Entrée'],freq:'hebdo'},
 ];
 
@@ -335,88 +336,66 @@ function wkLabel(o){
   return`${f(m)} – ${f(s)}`;
 }
 
-function addDays(dateStr,n){
-  const d=new Date(dateStr+'T12:00:00');
-  d.setDate(d.getDate()+n);
-  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-}
-function findCheckByTaskRoom(tid,room,slot){
-  // Cherche la coche active pour mensuel/bimens indépendamment du mois affiché
-  const suffix=slot?`|${tid}|${room}|${slot}`:`|${tid}|${room}`;
-  const key=Object.keys(checks).find(k=>k.endsWith(suffix)&&k.startsWith('month_'));
-  return key?checks[key]:null;
-}
-function nextMonthDate(wk,tid,room){
-  const c=findCheckByTaskRoom(tid,room,null);
-  const base=(c&&c.at)?new Date(c.at+'T12:00:00'):new Date(wk+'T12:00:00');
-  base.setDate(base.getDate()+21);
-  return base.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-}
-function in14Days(wk,tid,room,slot){
-  const c=findCheckByTaskRoom(tid,room,slot);
-  const base=(c&&c.at)?new Date(c.at+'T12:00:00'):new Date(wk+'T12:00:00');
-  base.setDate(base.getDate()+14);
-  return base.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-}
-
 // ── Check keys ─────────────────────────────────────────────────────
 // hebdo:   wk|tid|room
 // bimens:  month_YYYY-MM|tid|room|A or B  (1st or 2nd fortnight)
 // mensuel: month_YYYY-MM|tid|room
 
-function getCurrentMonth(){
-  const n=new Date();
-  return n.toISOString().slice(0,7); // YYYY-MM
+// Clés de stockage :
+// hebdo   → "h|YYYY-MM-DD|tid|room"   (par semaine)
+// bimens  → "b|tid|room|A" ou "b|tid|room|B"  (fixe, date-lockée)
+// mensuel → "m|tid|room"  (fixe, date-lockée)
+function ckH(wk,tid,room){ return 'h|'+wk+'|'+tid+'|'+room; }
+function ckB(tid,room,slot){ return 'b|'+tid+'|'+room+'|'+(slot||'A'); }
+function ckM(tid,room){ return 'm|'+tid+'|'+room; }
+
+function getCheckKey(wk,tid,room,slot){
+  const freq=(getAllTasks().find(t=>t.id===tid)||{freq:'hebdo'}).freq;
+  if(freq==='hebdo')  return ckH(wk,tid,room);
+  if(freq==='bimens') return ckB(tid,room,slot);
+  return ckM(tid,room);
 }
-function getMonthKey(wk){
-  return 'month_'+wk.slice(0,7);
-}
-function ck(wk,tid,room,slot){
-  const tasks=getAllTasks();
-  const t=tasks.find(x=>x.id===tid);
-  const freq=t?t.freq:'hebdo';
-  if(freq==='bimens'){
-    const mk=getMonthKey(wk);
-    return slot?`${mk}|${tid}|${room}|${slot}`:`${mk}|${tid}|${room}|A`;
-  }
-  if(freq==='mensuel'){
-    return `${getMonthKey(wk)}|${tid}|${room}`;
-  }
-  return `${wk}|${tid}|${room}`;
-}
+
+// isOn : retourne true si la tâche est cochée ET dans le délai
 function isOn(wk,tid,room,slot){
-  const freq=getAllTasks().find(t=>t.id===tid)?.freq||'hebdo';
-  // Hebdo: clé par semaine, logique simple
-  if(freq==='hebdo'){
-    const k=`${wk}|${tid}|${room}`;
-    return!!checks[k];
-  }
-  // Mensuel/bimens: chercher la coche active dans checks (indépendant du mois affiché)
-  // La clé contient month_YYYY-MM — on cherche une coche encore valide
-  const days=freq==='mensuel'?21:14;
-  const prefix=freq==='bimens'
-    ?(slot?`month_`:`month_`) // on cherche toutes les clés
-    :'month_';
-  // Chercher dans toutes les clés correspondant à cette tâche/pièce/slot
-  const suffix=freq==='bimens'
-    ?(slot?`|${tid}|${room}|${slot}`:`|${tid}|${room}|A`)
-    :`|${tid}|${room}`;
-  const matchingKey=Object.keys(checks).find(k=>k.endsWith(suffix)&&k.startsWith('month_'));
-  if(!matchingKey) return false;
-  const c=checks[matchingKey];
+  const freq=(getAllTasks().find(t=>t.id===tid)||{freq:'hebdo'}).freq;
+  const k=getCheckKey(wk,tid,room,slot);
+  const c=checks[k];
   if(!c) return false;
-  if(c===true) return true; // ancien format
-  if(!c.at) return true;
-  const checkedAt=new Date(c.at+'T12:00:00');
-  const unlockDate=new Date(checkedAt);
-  unlockDate.setDate(checkedAt.getDate()+days);
-  return new Date()<unlockDate;
+  if(freq==='hebdo') return true; // hebdo: pas de délai
+  // mensuel/bimens: vérifier le délai
+  const at=c.at||null;
+  if(!at) return true; // ancien format sans date
+  const days=freq==='mensuel'?21:14;
+  const unlock=new Date(at+'T12:00:00');
+  unlock.setDate(unlock.getDate()+days);
+  return new Date()<unlock;
+}
+
+// unlockDate : retourne la date de déblocage formatée
+function unlockDateStr(tid,room,slot){
+  const freq=(getAllTasks().find(t=>t.id===tid)||{freq:'hebdo'}).freq;
+  const k=freq==='bimens'?ckB(tid,room,slot):ckM(tid,room);
+  const c=checks[k];
+  if(!c||!c.at) return null;
+  const days=freq==='mensuel'?21:14;
+  const d=new Date(c.at+'T12:00:00');
+  d.setDate(d.getDate()+days);
+  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
 }
 
 async function toggle(wk,tid,room,slot){
-  const k=ck(wk,tid,room,slot);
+  const k=getCheckKey(wk,tid,room,slot);
   if(checks[k]) delete checks[k];
   else checks[k]={at: new Date().toISOString().slice(0,10)};
+  await save();
+}
+
+// doRedo : repart de aujourd'hui (reset la date de coche)
+async function doRedo(tid,room,slot){
+  const wk=wkKey(offset);
+  const k=getCheckKey(wk,tid,room,slot);
+  checks[k]={at: new Date().toISOString().slice(0,10)};
   await save();
 }
 
@@ -428,7 +407,6 @@ function sf(f){
   document.querySelectorAll('#room-filters .fb').forEach(b=>b.classList.toggle('on',b.dataset.filter===f));
   closeMenu();renderPlanning();
 }
-
 function renderFilters(){
   let h=`<button class="fb${filter==='all'?' on':''}" data-filter="all" onclick="sf('all')">Toutes</button>
     <button class="fb${filter==='todo'?' on':''}" data-filter="todo" onclick="sf('todo')">À faire</button>`;
@@ -523,31 +501,29 @@ window.toggleFreqMenu=toggleFreqMenu;window.setFreq=setFreq;
 window.addTask=addTask;window.deleteTaskFromRoom=deleteTaskFromRoom;window.quickAdd=quickAdd;
 window.tog=function(id){const el=document.getElementById(id);if(el)el.classList.toggle('hide');};
 window.doToggle=async function(wk,tid,room,slot){await toggle(wk,tid,room,slot);};
+window.doRedo=async function(tid,room,slot){await doRedo(tid,room,slot);};
 window.markWeekDone=async function(wk){
-  const tasks=getAllTasks();
+  const today=new Date().toISOString().slice(0,10);
   getAllRooms().forEach(room=>{
     getTasksForRoom(room).forEach(t=>{
       if(t.freq==='bimens'){
-        checks[ck(wk,t.id,room,'A')]=true;
-        checks[ck(wk,t.id,room,'B')]=true;
+        if(!isOn(wk,t.id,room,'A')) checks[ckB(t.id,room,'A')]={at:today};
+        if(!isOn(wk,t.id,room,'B')) checks[ckB(t.id,room,'B')]={at:today};
+      }else if(t.freq==='mensuel'){
+        if(!isOn(wk,t.id,room)) checks[ckM(t.id,room)]={at:today};
       }else{
-        checks[ck(wk,t.id,room)]=true;
+        if(!isOn(wk,t.id,room)) checks[ckH(wk,t.id,room)]={at:today};
       }
     });
   });
   await save();
 };
 window.resetWeek=async function(wk){
-  // Remove all keys for this week
-  const tasks=getAllTasks();
   getAllRooms().forEach(room=>{
     getTasksForRoom(room).forEach(t=>{
-      if(t.freq==='bimens'){
-        delete checks[ck(wk,t.id,room,'A')];
-        delete checks[ck(wk,t.id,room,'B')];
-      }else{
-        delete checks[ck(wk,t.id,room)];
-      }
+      if(t.freq==='bimens'){delete checks[ckB(t.id,room,'A')];delete checks[ckB(t.id,room,'B')];}
+      else if(t.freq==='mensuel'){delete checks[ckM(t.id,room)];}
+      else{delete checks[ckH(wk,t.id,room)];}
     });
   });
   await save();
@@ -573,7 +549,7 @@ function renderPlanning(){
   document.getElementById('pt').textContent=`${done} / ${tot} tâches · ${pct}%`;
 
   let html='';
-  const roomsToShow = (filter==='all'||filter==='todo') ? getAllRooms() : getAllRooms().filter(r=>r===filter);
+  const roomsToShow=(filter==='all'||filter==='todo')?getAllRooms():getAllRooms().filter(r=>r===filter);
   roomsToShow.forEach(room=>{
     let tasks=getTasksForRoom(room);
     let filtered=tasks.filter(t=>{
@@ -608,9 +584,8 @@ function renderPlanning(){
       // For mensuel: get current month label
       const now=new Date();
       const monthLabel=MONTHS_FR[now.getMonth()]+' '+now.getFullYear();
-      const biMonth=getMonthKey(wk).replace('month_','');
-      const [by,bm]=biMonth.split('-');
-      const biLabel=MONTHS_FR[parseInt(bm)-1]+' '+by;
+      const wkD=new Date(wk+'T12:00:00');
+      const biLabel=MONTHS_FR[wkD.getMonth()]+' '+wkD.getFullYear();
 
       html+=`<div class="task-row">
         ${(isBi||isMens)?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
@@ -623,37 +598,39 @@ function renderPlanning(){
         </div>
       </div>`;
 
-      // Bi-mensuel: two checkboxes for current month (1st and 2nd fortnight)
+      // Bi-mensuel
       if(isBi){
         const onA=isOn(wk,t.id,room,'A');
         const onB=isOn(wk,t.id,room,'B');
-        const next14A=in14Days(wk,t.id,room,'A'); const next14B=in14Days(wk,t.id,room,'B');
+        const nextA=onA?unlockDateStr(t.id,room,'A'):null;
+        const nextB=onB?unlockDateStr(t.id,room,'B'):null;
         html+=`<div class="bi-target">
           <div class="bi-chk${onA?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','A')">${onA?'✓':''}</div>
           ${onA
-            ? `<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14A}</span>`
-            : `<span class="bi-label">1ère quinzaine · ${biLabel}</span>`
-          }
-          <div style="width:12px"></div>
+            ?`<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span><span style="font-size:10px;color:#2d6a4f;margin-left:4px">Prochaine fois le ${nextA}</span>
+              <button class="redo-btn" onclick="event.stopPropagation();doRedo('${t.id}','${room}','A')">🔄</button>`
+            :`<span class="bi-label">1ère quinzaine · ${biLabel}</span>`}
+          <div style="width:8px"></div>
           <div class="bi-chk${onB?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','B')">${onB?'✓':''}</div>
           ${onB
-            ? `<span class="bi-label bi-done">2e quinzaine</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14B}</span>`
-            : `<span class="bi-label">2e quinzaine</span>`
-          }
+            ?`<span class="bi-label bi-done">2e quinzaine</span><span style="font-size:10px;color:#2d6a4f;margin-left:4px">Prochaine fois le ${nextB}</span>
+              <button class="redo-btn" onclick="event.stopPropagation();doRedo('${t.id}','${room}','B')">🔄</button>`
+            :`<span class="bi-label">2e quinzaine</span>`}
         </div>`;
       }
-      // Mensuel: one checkbox for current month
+      // Mensuel
       if(isMens){
         const onM=isOn(wk,t.id,room);
         const wkDate=new Date(wk+'T12:00:00');
-        const realMonthLabel=MONTHS_FR[wkDate.getMonth()]+' '+wkDate.getFullYear();
-        const nextDate=nextMonthDate(wk,t.id,room);
+        const realMonth=MONTHS_FR[wkDate.getMonth()]+' '+wkDate.getFullYear();
+        const nextM=onM?unlockDateStr(t.id,room,null):null;
         html+=`<div class="mens-target">
           <div class="mens-chk${onM?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${onM?'✓':''}</div>
           ${onM
-            ? `<span class="mens-label mens-done">Fait en ${realMonthLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:6px">· Prochaine fois le ${nextDate}</span>`
-            : `<span class="mens-label">À faire en ${realMonthLabel}</span>`
-          }
+            ?`<span class="mens-label mens-done">Fait en ${realMonth}</span>
+              <span style="font-size:10px;color:#2d6a4f;margin-left:6px">Prochaine fois le ${nextM}</span>
+              <button class="redo-btn" onclick="event.stopPropagation();doRedo('${t.id}','${room}',null)">🔄</button>`
+            :`<span class="mens-label">À faire en ${realMonth}</span>`}
         </div>`;
       }
     });
