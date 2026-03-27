@@ -324,6 +324,7 @@ function getTasksForRoom(room){
 function wkKey(o){
   const n=new Date(),dw=n.getDay()||7,m=new Date(n);
   m.setDate(n.getDate()-dw+1+o*7);
+  m.setHours(12,0,0,0); // forcer midi pour éviter décalage UTC
   return m.toISOString().slice(0,10);
 }
 function wkLabel(o){
@@ -708,7 +709,8 @@ function getMonthWeeks(mo){
   while(mon<=lastDay){
     const sun=new Date(mon);sun.setDate(mon.getDate()+6);
     const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-    weeks.push({key:mon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
+    const monNoon=new Date(mon);monNoon.setHours(12,0,0,0);
+    weeks.push({key:monNoon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
     mon.setDate(mon.getDate()+7);
   }
   return{weeks,ty,tm};
@@ -830,7 +832,8 @@ function renderCal(weeks,ty,tm){
     const date=new Date(ty,tm,day);
     const dw=date.getDay()||7;
     const mon=new Date(date);mon.setDate(date.getDate()-dw+1);
-    const wk=mon.toISOString().slice(0,10);
+    const monN=new Date(mon);monN.setHours(12,0,0,0);
+    const wk=monN.toISOString().slice(0,10);
     const s=dayStatus[wk]||{done:0,tot:0};
     const isFuture=date>today;
     const pct=s.tot?s.done/s.tot:0;
