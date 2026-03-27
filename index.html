@@ -304,6 +304,7 @@ onSnapshot(doc(db,'planning','shared'), snap=>{
 
 async function save(){
   await saveToFirestore({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
+  renderAll();
 }
 
 // ── Task helpers ───────────────────────────────────────────────────
