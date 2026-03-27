@@ -570,6 +570,7 @@ function renderPlanning(){
       html+=`<div class="task-row">
         ${(isBi||isMens)?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
         <span class="task-name${chk?' struck':''} ${(isBi&&isOn(wk,t.id,room,'A')&&isOn(wk,t.id,room,'B'))||(isMens&&isOn(wk,t.id,room))?' struck':''}">${t.name}</span>
+        ${chk?`<button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}')">🔄</button>`:''}
         <div class="freq-picker" style="position:static">
           <span class="ftag ${FCLASS[t.freq]}" id="badge-${t.id}-${room}" onclick="toggleFreqMenu('${t.id}','${room}',this)">${FLABELS[t.freq]} ▾</span>
           <div class="freq-menu hide" id="fm-${t.id}-${room}">
