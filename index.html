@@ -287,8 +287,12 @@ async function saveToFirestore(data){
   }catch(e){setSyncDot('err');console.error(e);}
 }
 
+// Flag pour ignorer onSnapshot pendant une sauvegarde locale
+let isSaving=false;
+
 // Listen to real-time changes from Firestore
 onSnapshot(doc(db,'planning','shared'), snap=>{
+  if(isSaving) return; // ignorer pendant qu'on sauvegarde
   if(snap.exists()){
     const d=snap.data();
     checks=d.checks||{};
@@ -303,8 +307,10 @@ onSnapshot(doc(db,'planning','shared'), snap=>{
 });
 
 async function save(){
+  isSaving=true;
+  renderAll(); // mise à jour immédiate de l'UI
   await saveToFirestore({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
-  renderAll();
+  setTimeout(()=>{ isSaving=false; }, 1000); // reprendre écoute après 1s
 }
 
 // ── Task helpers ───────────────────────────────────────────────────
@@ -792,9 +798,9 @@ function renderCal(weeks,ty,tm){
 }
 
 function renderAll(){
-  if(currentScreen==='planning')renderPlanning();
-  else if(currentScreen==='bilan')renderBilan();
-  else if(currentScreen==='manage')renderManage();
+  renderPlanning();
+  renderBilan();
+  renderManage();
 }
 
 // ── Room select new room ───────────────────────────────────────────
