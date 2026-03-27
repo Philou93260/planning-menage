@@ -77,7 +77,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .mens-label{font-size:12px;color:#555;font-weight:500}
 .mens-done{color:#aaa!important;text-decoration:line-through}
 .bi-done{color:#aaa!important;text-decoration:line-through}
-.redo-btn{background:#edf7f1;border:1.5px solid #2d6a4f;border-radius:10px;cursor:pointer;font-size:13px;padding:3px 9px;color:#2d6a4f;font-weight:700;flex-shrink:0;margin-left:6px}
 /* manage */
 .manage-room{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
 .manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
@@ -287,12 +286,8 @@ async function saveToFirestore(data){
   }catch(e){setSyncDot('err');console.error(e);}
 }
 
-// Flag pour ignorer onSnapshot pendant une sauvegarde locale
-let isSaving=false;
-
 // Listen to real-time changes from Firestore
 onSnapshot(doc(db,'planning','shared'), snap=>{
-  if(isSaving) return; // ignorer pendant qu'on sauvegarde
   if(snap.exists()){
     const d=snap.data();
     checks=d.checks||{};
@@ -307,10 +302,7 @@ onSnapshot(doc(db,'planning','shared'), snap=>{
 });
 
 async function save(){
-  isSaving=true;
-  renderAll(); // mise à jour immédiate de l'UI
   await saveToFirestore({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
-  setTimeout(()=>{ isSaving=false; }, 1000); // reprendre écoute après 1s
 }
 
 // ── Task helpers ───────────────────────────────────────────────────
@@ -570,7 +562,6 @@ function renderPlanning(){
       html+=`<div class="task-row">
         ${(isBi||isMens)?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
         <span class="task-name${chk?' struck':''} ${(isBi&&isOn(wk,t.id,room,'A')&&isOn(wk,t.id,room,'B'))||(isMens&&isOn(wk,t.id,room))?' struck':''}">${t.name}</span>
-        ${chk?`<button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}')">🔄</button>`:''}
         <div class="freq-picker" style="position:static">
           <span class="ftag ${FCLASS[t.freq]}" id="badge-${t.id}-${room}" onclick="toggleFreqMenu('${t.id}','${room}',this)">${FLABELS[t.freq]} ▾</span>
           <div class="freq-menu hide" id="fm-${t.id}-${room}">
@@ -586,12 +577,12 @@ function renderPlanning(){
         html+=`<div class="bi-target">
           <div class="bi-chk${onA?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','A')">${onA?'✓':''}</div>
           ${onA
-            ?`<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span><button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}','A')">🔄</button>`
+            ?`<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span>`
             :`<span class="bi-label">1ère quinzaine · ${biLabel}</span>`}
           <div style="width:8px"></div>
           <div class="bi-chk${onB?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','B')">${onB?'✓':''}</div>
           ${onB
-            ?`<span class="bi-label bi-done">2e quinzaine</span><button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}','B')">🔄</button>`
+            ?`<span class="bi-label bi-done">2e quinzaine</span>`
             :`<span class="bi-label">2e quinzaine</span>`}
         </div>`;
       }
@@ -603,7 +594,7 @@ function renderPlanning(){
         html+=`<div class="mens-target">
           <div class="mens-chk${onM?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${onM?'✓':''}</div>
           ${onM
-            ?`<span class="mens-label mens-done">Fait en ${realMonth}</span><button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}')">🔄</button>`
+            ?`<span class="mens-label mens-done">Fait en ${realMonth}</span>`
             :`<span class="mens-label">À faire en ${realMonth}</span>`}
         </div>`;
       }
@@ -655,15 +646,11 @@ function getMonthWeeks(mo){
   const firstDay=new Date(ty,tm,1),lastDay=new Date(ty,tm+1,0);
   let mon=new Date(firstDay);
   const dw=mon.getDay()||7;mon.setDate(mon.getDate()-dw+1);
-  mon.setHours(12,0,0,0); // forcer midi pour éviter les décalages de fuseau horaire
   const weeks=[];
   while(mon<=lastDay){
     const sun=new Date(mon);sun.setDate(mon.getDate()+6);
     const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-    // Utiliser la même logique que wkKey : date locale en ISO
-    const monLocal=new Date(mon.getTime()-mon.getTimezoneOffset()*60000);
-    const key=monLocal.toISOString().slice(0,10);
-    weeks.push({key,label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
+    weeks.push({key:mon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
     mon.setDate(mon.getDate()+7);
   }
   return{weeks,ty,tm};
@@ -803,9 +790,9 @@ function renderCal(weeks,ty,tm){
 }
 
 function renderAll(){
-  renderPlanning();
-  renderBilan();
-  renderManage();
+  if(currentScreen==='planning')renderPlanning();
+  else if(currentScreen==='bilan')renderBilan();
+  else if(currentScreen==='manage')renderManage();
 }
 
 // ── Room select new room ───────────────────────────────────────────
