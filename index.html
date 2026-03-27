@@ -75,6 +75,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .mens-chk{width:22px;height:22px;border-radius:6px;border:2px solid #b39ddb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:white;transition:all .15s}
 .mens-chk.on{background:#5c35b5;border-color:#5c35b5}
 .mens-label{font-size:12px;color:#555;font-weight:500}
+.redo-btn{background:#edf7f1;border:1.5px solid #2d6a4f;border-radius:10px;cursor:pointer;font-size:13px;padding:3px 10px;color:#2d6a4f;font-weight:700;flex-shrink:0;margin-left:4px}
 .mens-done{color:#aaa!important;text-decoration:line-through}
 .bi-done{color:#aaa!important;text-decoration:line-through}
 /* manage */
@@ -615,7 +616,8 @@ function renderPlanning(){
 
       html+=`<div class="task-row">
         ${(isBi||isMens)?'<div style="width:24px;flex-shrink:0"></div>':`<div class="chk${chk?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${chk?'✓':''}</div>`}
-        <span class="task-name${chk?' struck':''}">${t.name}</span>
+        <span class="task-name${chk?' struck':''}${(isBi&&isOn(wk,t.id,room,'A')&&isOn(wk,t.id,room,'B'))||(isMens&&isOn(wk,t.id,room))?' struck':''}">${t.name}</span>
+        ${chk&&!isBi&&!isMens?`<button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}')">🔄</button>`:''}
         <div class="freq-picker" style="position:static">
           <span class="ftag ${FCLASS[t.freq]}" id="badge-${t.id}-${room}" onclick="toggleFreqMenu('${t.id}','${room}',this)">${FLABELS[t.freq]} ▾</span>
           <div class="freq-menu hide" id="fm-${t.id}-${room}">
@@ -632,13 +634,13 @@ function renderPlanning(){
         html+=`<div class="bi-target">
           <div class="bi-chk${onA?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','A')">${onA?'✓':''}</div>
           ${onA
-            ? `<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14A}</span>`
+            ? `<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14A}</span><button class='redo-btn' onclick='event.stopPropagation();doToggle(\"${wk}\",\"${t.id}\",\"${room}\",\"A\")'>🔄</button>`
             : `<span class="bi-label">1ère quinzaine · ${biLabel}</span>`
           }
           <div style="width:12px"></div>
           <div class="bi-chk${onB?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','B')">${onB?'✓':''}</div>
           ${onB
-            ? `<span class="bi-label bi-done">2e quinzaine</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14B}</span>`
+            ? `<span class="bi-label bi-done">2e quinzaine</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14B}</span><button class='redo-btn' onclick='event.stopPropagation();doToggle(\"${wk}\",\"${t.id}\",\"${room}\",\"B\")'>🔄</button>`
             : `<span class="bi-label">2e quinzaine</span>`
           }
         </div>`;
