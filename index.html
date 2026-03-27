@@ -78,6 +78,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .redo-btn{background:#edf7f1;border:1.5px solid #2d6a4f;border-radius:10px;cursor:pointer;font-size:13px;padding:3px 10px;color:#2d6a4f;font-weight:700;flex-shrink:0;margin-left:4px}
 .mens-done{color:#aaa!important;text-decoration:line-through}
 .bi-done{color:#aaa!important;text-decoration:line-through}
+.redo-btn{background:#edf7f1;border:1.5px solid #2d6a4f;border-radius:10px;cursor:pointer;font-size:13px;padding:3px 10px;color:#2d6a4f;font-weight:700;flex-shrink:0;margin-left:6px}
 /* manage */
 .manage-room{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
 .manage-room-hdr{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#f0f7f4;cursor:pointer;user-select:none}
@@ -280,15 +281,19 @@ function setSyncDot(state){ // 'sync','ok','err'
 }
 
 async function saveToFirestore(data){
+  isSaving=true;
   setSyncDot('sync');
   try{
     await setDoc(doc(db,'planning','shared'),data,{merge:true});
     setSyncDot('ok');
   }catch(e){setSyncDot('err');console.error(e);}
+  setTimeout(()=>{ isSaving=false; }, 1500);
 }
 
+let isSaving=false;
 // Listen to real-time changes from Firestore
 onSnapshot(doc(db,'planning','shared'), snap=>{
+  if(isSaving) return;
   if(snap.exists()){
     const d=snap.data();
     checks=d.checks||{};
@@ -304,6 +309,8 @@ onSnapshot(doc(db,'planning','shared'), snap=>{
 
 async function save(){
   await saveToFirestore({checks,freq:freqOv,custom:customTasks,deleted:deletedIds,rooms:roomOrder});
+  renderPlanning();
+  renderBilan();
 }
 
 // ── Task helpers ───────────────────────────────────────────────────
@@ -630,22 +637,20 @@ function renderPlanning(){
       if(isBi){
         const onA=isOn(wk,t.id,room,'A');
         const onB=isOn(wk,t.id,room,'B');
-        const next14A=in14Days(wk,t.id,room,'A'); const next14B=in14Days(wk,t.id,room,'B');
+        const next14A=in14Days(wk,t.id,room,'A');
+        const next14B=in14Days(wk,t.id,room,'B');
         html+=`<div class="bi-target">
           <div class="bi-chk${onA?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','A')">${onA?'✓':''}</div>
-          ${onA
-            ? `<span class="bi-label bi-done">1ère quinzaine · ${biLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14A}</span><button class='redo-btn' onclick='event.stopPropagation();doToggle(\"${wk}\",\"${t.id}\",\"${room}\",\"A\")'>🔄</button>`
-            : `<span class="bi-label">1ère quinzaine · ${biLabel}</span>`
-          }
-          <div style="width:12px"></div>
+          <span class="bi-label${onA?' bi-done':''}">1ère quinzaine · ${biLabel}</span>
+          ${onA?`<span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14A}</span><button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}','A')">🔄</button>`:''}
+        </div>
+        <div class="bi-target">
           <div class="bi-chk${onB?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}','B')">${onB?'✓':''}</div>
-          ${onB
-            ? `<span class="bi-label bi-done">2e quinzaine</span><span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14B}</span><button class='redo-btn' onclick='event.stopPropagation();doToggle(\"${wk}\",\"${t.id}\",\"${room}\",\"B\")'>🔄</button>`
-            : `<span class="bi-label">2e quinzaine</span>`
-          }
+          <span class="bi-label${onB?' bi-done':''}">2e quinzaine · ${biLabel}</span>
+          ${onB?`<span style="color:#2d6a4f;font-size:10px;margin-left:4px">· Prochaine fois le ${next14B}</span><button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}','B')">🔄</button>`:''}
         </div>`;
       }
-      // Mensuel: one checkbox for current month
+            // Mensuel: one checkbox for current month
       if(isMens){
         const onM=isOn(wk,t.id,room);
         const wkDate=new Date(wk+'T12:00:00');
@@ -654,7 +659,7 @@ function renderPlanning(){
         html+=`<div class="mens-target">
           <div class="mens-chk${onM?' on':''}" onclick="doToggle('${wk}','${t.id}','${room}')">${onM?'✓':''}</div>
           ${onM
-            ? `<span class="mens-label mens-done">Fait en ${realMonthLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:6px">· Prochaine fois le ${nextDate}</span>`
+            ? `<span class="mens-label mens-done">Fait en ${realMonthLabel}</span><span style="color:#2d6a4f;font-size:10px;margin-left:6px">· Prochaine fois le ${nextDate}</span><button class="redo-btn" onclick="event.stopPropagation();doToggle('${wk}','${t.id}','${room}')">🔄</button>`
             : `<span class="mens-label">À faire en ${realMonthLabel}</span>`
           }
         </div>`;
