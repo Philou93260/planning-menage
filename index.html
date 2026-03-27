@@ -655,11 +655,15 @@ function getMonthWeeks(mo){
   const firstDay=new Date(ty,tm,1),lastDay=new Date(ty,tm+1,0);
   let mon=new Date(firstDay);
   const dw=mon.getDay()||7;mon.setDate(mon.getDate()-dw+1);
+  mon.setHours(12,0,0,0); // forcer midi pour éviter les décalages de fuseau horaire
   const weeks=[];
   while(mon<=lastDay){
     const sun=new Date(mon);sun.setDate(mon.getDate()+6);
     const f=d=>d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-    weeks.push({key:mon.toISOString().slice(0,10),label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
+    // Utiliser la même logique que wkKey : date locale en ISO
+    const monLocal=new Date(mon.getTime()-mon.getTimezoneOffset()*60000);
+    const key=monLocal.toISOString().slice(0,10);
+    weeks.push({key,label:`${f(mon)} – ${f(sun)}`,mon:new Date(mon),sun:new Date(sun)});
     mon.setDate(mon.getDate()+7);
   }
   return{weeks,ty,tm};
